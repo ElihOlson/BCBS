@@ -10,14 +10,15 @@ sbInteract = supabaseInteractions()
 prompt = input("Enter a prompt: ")
 
 schema = sbInteract.getSchema()
+print(f"Schema: {schema}")
 
-sqlQuery = sqlagent.genSQL(prompt,schema)
-print(sqlQuery)
+#sqlQuery = sqlagent.genSQL(prompt,schema)
+#print(sqlQuery)
 
-prompt = input("Continue? ")
+#prompt = input("Continue? ")
 
-response = bktagent.generateBuckets(sqlQuery,schema)
-print(response)
+#response = bktagent.generateBuckets(sqlQuery,schema)
+#print(response)
 
 
 
