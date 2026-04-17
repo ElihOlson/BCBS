@@ -3,14 +3,15 @@ import os
 from supabase import *
 import json
 from dotenv import load_dotenv
+from pathlib import Path
 
-
-load_dotenv() 
+basedir = Path(__file__).resolve().parent
+load_dotenv(basedir / ".env")
 
 
 grokKey = os.getenv("GROK_API_KEY")
-spbsKey = os.getenv("SUPABASE_KEY")
-spbsUrl = os.getenv("SUPABASE_URL")
+spbsKey = os.getenv("SUPABASE_KEY2")
+spbsUrl = os.getenv("SUPABASE_URL2")
 
 
 class sqlAgent:
@@ -27,10 +28,8 @@ class sqlAgent:
 
 
 
-    def genSQL(self,prompt = 'none', schema = None):
-        
-        schema = r"TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
-        
+    def genSQL(self,prompt, schema):
+                
         sysPrompt1 = f"Given a schema and a user request for data, return a sql query which can extract data matching the users request. The schema is: {schema}. Do not include any other text besides the sql query"
         sysPrompt2 = f"Given a user request {prompt} and the database schema {schema}, is the user request fulfillable. Do not include any other text besides yes or no in your final answer"
 
@@ -144,7 +143,7 @@ class bucketingAgent:
         self.SUPABASE_KEY = spbsKey
         DBClient = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)
 
-        self.schema = r"TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
+        #self.schema = r"TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
 
     def sendMessage(self, prompt = 'none', systemPrompt = 'none'):
         chat_completion = self.client.chat.completions.create(
@@ -163,8 +162,8 @@ class bucketingAgent:
 
         return chat_completion.choices[0].message.content
     
-    def generateBuckets(self,sqlQuery):
-        schema = self.schema
+    def generateBuckets(self,sqlQuery,schema):
+        
         #create bucket ideas given schema
         #return sql queries for each bucket
         #sqlQuery = "SELECT first_name, email FROM users WHERE LOWER(first_name) = 'joe';"
