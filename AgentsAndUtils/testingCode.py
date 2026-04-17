@@ -1,6 +1,19 @@
 #from agents import sqlAgent, bucketingAgent
 from getSchema import supabaseInteractions
 from gptAgents import *
+import json
+
+def printer(json_str):
+    
+
+    data = json.loads(json_str)
+
+    for obj in data:
+        for key, value in obj.items():
+            print(f"{key}: {value}")
+        print()  # blank line between objects
+
+
 
 sqlagent = sqlAgent()
 bktagent = bucketingAgent()
@@ -13,16 +26,30 @@ schema = "Table [addresses]: address_id [PK], line1, line2, city, county, state,
 
 
 sqlQuery = sqlagent.genSQL(prompt,schema)
-print(sqlQuery)
+print(f"\nQuery: {sqlQuery}\n")
 
-prompt = input("Continue? ")
+prompt = input("Automatic Bucketing (Y/N)? ")
+print()
 
-response = bktagent.generateBuckets(sqlQuery,schema)
-print(response)
+if prompt == 'Y' or prompt == 'y':
+    response = bktagent.generateBuckets(sqlQuery,schema)
 
-sql = "SELECT m.* FROM marketing_ai.members m JOIN marketing_ai.addresses a ON m.address_id = a.address_id WHERE a.state = 'CA';"
-result = sbInteract.run_sql_query(sql)
-print(result)
+    try:
+        printer(response)
+    except:
+        print("Bucketing Format Failed:\n")
+        print(response)
+else:
+    print("Exit")
+
+
+
+#data = [{"desc":"Identify NEBRASKA residents who are tobacco users and have at least one medical claim with a total charge greater than $10000", "sql":"SELECT marketing_ai.m.* FROM marketing_ai.members m JOIN marketing_ai.ref_ne_geo rn ON marketing_ai.m.address_id = marketing_ai.rn.zip WHERE rn.county = 'NEBRASKA' AND marketing_ai.m.tobacco_user = 'true' AND m.member_id IN (SELECT member_id FROM medical_claims WHERE total_charges > 10000)"},{"desc":"Find the demographics of the tobacco using residents in NEBRASKA who are subscribers", "sql":"SELECT marketing_ai.m.* FROM marketing_ai.members m WHERE m.address_id IN (SELECT address_id FROM addresses WHERE address_id IN (SELECT address_id FROM marketing_ai.ref_ne_geo WHERE county = 'NEBRASKA')) AND m.tobacco_user = 'true' AND m.is_subscriber = 'true'"},{"desc":"Get the number of tobacco users in NEBRASKA", "sql":"SELECT COUNT(*) FROM marketing_ai.members m JOIN marketing_ai.ref_ne_geo rn ON marketing_ai.m.address_id = marketing_ai.rn.zip WHERE rn.county = 'NEBRASKA' AND marketing_ai.m.tobacco_user = 'true'"},{"desc":"List the most common cities in NEBRASKA where tobacco users live", "sql":"SELECT city, COUNT(*) FROM marketing_ai.ref_ne_geo WHERE county = 'NEBRASKA' GROUP BY city ORDER BY COUNT(*) DESC LIMIT 10"}]
+
+
+#sql = "SELECT m.* FROM marketing_ai.members m JOIN marketing_ai.addresses a ON m.address_id = a.address_id WHERE a.state = 'CA';"
+#result = sbInteract.run_sql_query(sql)
+#print(result)
 
 
 

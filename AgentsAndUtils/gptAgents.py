@@ -160,7 +160,7 @@ class bucketingAgent:
         #sqlQuery = "SELECT first_name, email FROM users WHERE LOWER(first_name) = 'joe';"
         #schema = "TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
 
-        systemPrompt = 'Given a SQL query and schema, list useful audience groups. Reply only in JSON: [{"desc":"","sql":""}]'
+        systemPrompt = 'Given a general SQL query and a DB schema, list useful "sub" audience groups based off the original query and provide new SQL to query that data. IMPORTANT: Reply only in json using the following format: [{"desc1":"text","sql1":"query"}, {"desc2":"text","sql2":"query"}]. Do not include any other information before or after the json'
         prompt1 = f"query:{sqlQuery}\nschema:{schema}"
 
 
