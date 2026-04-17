@@ -14,6 +14,10 @@ spbsKey = os.getenv("SUPABASE_KEY2")
 spbsUrl = os.getenv("SUPABASE_URL2")
 
 
+#get emails out
+#fix sql execution
+
+
 class sqlAgent:
     def __init__(self):
         

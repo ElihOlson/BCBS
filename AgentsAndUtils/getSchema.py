@@ -38,6 +38,7 @@ class supabaseInteractions:
                     cols = [r['column_name'] for r in rpc_res.data if r['table_name'] == table]
                     #resultSchema.append(f"Table [{table}]: {', '.join(cols)}")
                     resultSchema.append(f"{table}({','.join(cols)})")
+                    print(resultSchema)
                 
                 return resultSchema
 
