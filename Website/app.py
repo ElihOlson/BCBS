@@ -33,8 +33,16 @@ def startup_checks():
             
             print("\n--- DETECTED SCHEMA ---")
             for table in tables:
-                cols = [r['column_name'] for r in rpc_res.data if r['table_name'] == table]
-                print(f"Table [{table}]: {', '.join(cols)}")
+                rows = [r for r in rpc_res.data if r['table_name'] == table]
+                col_parts = []
+                for r in rows:
+                    label = r['column_name']
+                    if r.get('is_primary_key'):
+                        label += ' [PK]'
+                    if r.get('foreign_table'):
+                        label += f" [FK -> {r['foreign_table']}.{r['foreign_column']}]"
+                    col_parts.append(label)
+                print(f"Table [{table}]: {', '.join(col_parts)}")
         else:
             print("CONNECTION: Success, but no tables found in public schema.")
             
