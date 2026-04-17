@@ -20,6 +20,10 @@ prompt = input("Continue? ")
 response = bktagent.generateBuckets(sqlQuery,schema)
 print(response)
 
+sql = "SELECT m.* FROM marketing_ai.members m JOIN marketing_ai.addresses a ON m.address_id = a.address_id WHERE a.state = 'CA';"
+result = sbInteract.run_sql_query(sql)
+print(result)
+
 
 
 
