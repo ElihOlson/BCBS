@@ -36,7 +36,7 @@ class sqlAgent:
         # Single call: return SQL or "INVALID" — avoids sending schema twice
         sysPrompt = (
             f"Schema:{schema}\n"
-            "Return a SQL query for the user request. "
+            "Return a SQL query for the user request. Add (marketing_ai.) before all column names i.e. SELECT m.* FROM marketing_ai.members m"
             "If the request cannot be answered from the schema, reply only: INVALID"
         )
         result = self.sendMessage(prompt, sysPrompt)
