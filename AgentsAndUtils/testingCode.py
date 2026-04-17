@@ -1,6 +1,6 @@
-from agents import sqlAgent, bucketingAgent
+#from agents import sqlAgent, bucketingAgent
 from getSchema import supabaseInteractions
-
+from gptAgents import *
 
 sqlagent = sqlAgent()
 bktagent = bucketingAgent()
