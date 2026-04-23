@@ -5,6 +5,9 @@ import json
 import csv
 import re
 from pathlib import Path
+import traceback
+from io import StringIO
+
 
 def extract_bucket_payload(raw_text):
     text = raw_text.strip()
@@ -42,29 +45,48 @@ def to_int_or_zero(value):
     return int(digits[0]) if digits else 0
 
 
-def write_bucket_csv(bucket_items, output_path):
-    rows = []
-    for bucket in bucket_items:
-        rows.append([
-            bucket.get("name", bucket.get("bucket_name", "")),
-            to_int_or_zero(bucket.get("estimated_count", bucket.get("bucket_count", 0))),
-            bucket.get("rationale", ""),
-            bucket.get("suggested_treatment", ""),
-            bucket.get("sql", ""),
-        ])
-
-    with open(output_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+def json_to_csv(json_string):
+    json_string = json_string.strip().replace("```json", "").replace("```", "").strip()
+    data = json.loads(json_string)
+    
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Define CSV headers
+    headers = [
+        "universe_definition",
+        "primary_slicing_axis",
+        "rank",
+        "name",
+        "sql",
+        "estimated_count",
+        "rationale",
+        "suggested_treatment",
+        "coverage_note"
+    ]
+    
+    writer.writerow(headers)
+    
+    # Extract top-level fields
+    universe_definition = data.get("universe_definition")
+    primary_slicing_axis = data.get("primary_slicing_axis")
+    coverage_note = data.get("coverage_note")
+    
+    # Iterate through buckets
+    for bucket in data.get("buckets", []):
         writer.writerow([
-            "Name of bucket",
-            "Count of bucket",
-            "Rational of the bucket",
-            "Suggested treatment",
-            "SQL",
+            universe_definition,
+            primary_slicing_axis,
+            bucket.get("rank"),
+            bucket.get("name"),
+            bucket.get("sql"),
+            bucket.get("estimated_count"),
+            bucket.get("rationale"),
+            bucket.get("suggested_treatment"),
+            coverage_note
         ])
-        writer.writerows(rows)
-
-    return rows
+    
+    return output.getvalue()
 
 
 
@@ -81,16 +103,19 @@ myBuckets = bktagent.generateBuckets("none", schema)
 print("OUTPUT: \n\n", myBuckets)
 
 try:
-    buckets = extract_bucket_payload(myBuckets)
+    #buckets = extract_bucket_payload(myBuckets)
     output_file = Path(__file__).resolve().parent / "bucket_output.csv"
-    rows = write_bucket_csv(buckets, output_file)
+    response = json_to_csv(myBuckets)
 
-    print(f"CSV file returned: {output_file}")
-    if rows and all(int(row[1]) == 0 for row in rows):
-        print("If all counts are 0, then not possible")
+    print("\n\n\n"+response)
+    output_file.write_text(response, encoding="utf-8", newline="")
+    #print(f"\n\n{rows[:][4]}\n\n")
+
 except Exception as e:
     print("Could not parse AI response into CSV")
     print(f"Error: {e}")
+
+    print(traceback.format_exc())
 
 
 

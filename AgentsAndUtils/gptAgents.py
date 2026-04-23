@@ -1,4 +1,4 @@
-from groq import Groq
+from openai import OpenAI
 import os
 from supabase import *
 import json
@@ -23,7 +23,8 @@ class sqlAgent:
         
         
 
-        self.client = Groq(api_key=grokKey)
+        #self.client = Groq(api_key=grokKey)
+        self.client = OpenAI(api_key=grokKey,base_url= "https://api.mistral.ai/v1") # <-- swap this per provider )
 
         self.SUPABASE_URL = spbsUrl
         self.SUPABASE_KEY = spbsKey
@@ -48,11 +49,85 @@ class sqlAgent:
 
 
     def sendMessage(self, prompt, systemPrompt):
+
+        outreach_strategy_schema = {
+    "name": "generate_outreach_strategy",
+    "description": "Generate a member segmentation outreach strategy with ranked buckets, SQL, and rationale.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "universe_definition": {
+                "type": "string",
+                "description": "Definition of the target population"
+            },
+            "primary_slicing_axis": {
+                "type": "string",
+                "description": "Main logic used to segment members"
+            },
+            "buckets": {
+                "type": "array",
+                "description": "List of mutually exclusive member buckets",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "rank": {
+                            "type": "integer",
+                            "description": "Priority rank of the bucket"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Bucket name"
+                        },
+                        "sql": {
+                            "type": "string",
+                            "description": "SQL query defining this bucket"
+                        },
+                        "estimated_count": {
+                            "type": ["integer", "null"],
+                            "description": "Estimated number of members in the bucket"
+                        },
+                        "rationale": {
+                            "type": "string",
+                            "description": "Why this bucket exists and why it matters"
+                        },
+                        "suggested_treatment": {
+                            "type": "string",
+                            "description": "Recommended outreach strategy"
+                        }
+                    },
+                    "required": [
+                        "rank",
+                        "name",
+                        "sql",
+                        "estimated_count",
+                        "rationale",
+                        "suggested_treatment"
+                    ]
+                }
+            },
+            "coverage_note": {
+                "type": "string",
+                "description": "Explanation of how much of the universe is covered"
+            }
+        },
+        "required": [
+            "universe_definition",
+            "primary_slicing_axis",
+            "buckets",
+            "coverage_note"
+        ]
+    }
+}
+
         chat_completion = self.client.chat.completions.create(
             messages=[
                 {"role": "system", "content": systemPrompt},
-                {"role": "user", "content": prompt},
-            ],
+                {"role": "user", "content": prompt}],
+                tools=[{
+                    "type": "function",
+                    "function": outreach_strategy_schema
+                }],
+                tool_choice={"type": "function", "function": {"name": "generate_outreach_strategy"}},
             model="llama-3.3-70b-versatile",
             # max_tokens=500,
         )
@@ -135,7 +210,7 @@ class sqlAgent:
 class bucketingAgent:
     def __init__(self,):
 
-        self.client = Groq(api_key=grokKey)
+        self.client = OpenAI(api_key=grokKey, base_url="https://api.mistral.ai/v1")
         self.SUPABASE_URL = spbsUrl
         self.SUPABASE_KEY = spbsKey
         DBClient = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)
@@ -148,7 +223,7 @@ class bucketingAgent:
                 {"role": "system", "content": systemPrompt},
                 {"role": "user", "content": prompt},
             ],
-            model="llama-3.3-70b-versatile",
+            model="codestral-latest",
             # max_tokens=500,
         )
         return chat_completion.choices[0].message.content
@@ -180,27 +255,22 @@ class bucketingAgent:
             r"""
             
             SCHEMA RULES — MUST FOLLOW WITHOUT EXCEPTION
-            
+ 
             - Conditions are in `member_conditions` (joined by member_id, with icd10_code). Do not invent a `member_features` table.
-
             - State/location comes through `members -> addresses` (addresses.state). There is no `members.state` column.
-
             - Age must be computed from `members.date_of_birth` against CURRENT_DATE.
-
             - SMS opt-in lives in `consent_preferences.sms_opt_in`. Required for every bucket.
-
             - Active suppression lives in `suppression_lists` where LOWER(channel) = 'sms' and (expires_at IS NULL OR expires_at > CURRENT_DATE). Required exclusion for every bucket.
-
             - SMS engagement history lives in `sms_events`. Valid event_type values are: 'sent', 'delivered', 'replied', 'opt_out'. There is no 'clicked' or 'opened' event type — never use them.
-
             - Member must be currently active: LOWER(members.status) = 'active' AND they have an active `enrollments` row where `is_active = TRUE`.
-
             - Care gap open status must always be filtered as: LOWER(care_gaps.status) = 'open'.
-
-            - Valid care_gaps.measure_category values: 'preventive', 'chronic', 'screening', 'immunization'. Do not use 'Diabetes', 'Hypertension', or 'Preventive'.
-
+            - Valid care_gaps.measure_category values: 'preventive', 'chronic', 'screening', 'immunization'.
             - ALL text comparisons must use LOWER() on both sides: LOWER(column) = 'lowercase_value'. This applies to every text column in every WHERE clause without exception.
-            
+            - The schema includes a `query_pattern` field for every column. This is a mandatory instruction on how to filter that column. Follow it exactly — do not override it with your own judgment.
+            - If query_pattern says LIKE, use LIKE. If it says exact match, use exact match. If it says EXISTS only, never use it in a WHERE clause directly.
+            - Any column whose query_pattern contains 'Free-text or clinical description' must always be filtered with LOWER(column) LIKE '%keyword%'. Never use = for these columns under any circumstance, even if the user provides what looks like an exact value.
+            - Before finalizing any SQL, check every column reference against the schema. If a column does not exist on the table being queried, find the correct table and access it via EXISTS subquery.
+
             INPUT BRIEF
             
             User request: User request: { "about": { "age_range": [25, 40], "location": ["NE", "IA"], "conditions": ["diabetes", "hypertension"], "engagement_level": "medium" }, "for": { "campaign_type": "preventive_care", "channel": "sms", "message_goal": "schedule_appointment" }, "success_conditions": { "primary_metric": "conversion_rate", "secondary_metrics": ["open_rate", "click_rate"], "weights": { "conversion_rate": 0.6, "open_rate": 0.25, "click_rate": 0.15 } } }
