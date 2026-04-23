@@ -1,14 +1,12 @@
 import os
 import re
 import json
+import random
 import warnings
 import logging
 from pathlib import Path
 
 import pandas as pd
-from sklearn.cluster import KMeans
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from transformers import pipeline, logging as hf_logging
 
 # -------------------------
@@ -25,16 +23,13 @@ hf_logging.set_verbosity_error()
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
 
-INPUT_FILE = "medical_mock_data.csv"
+INPUT_FILE = "bucket_output.csv"
 OUTPUT_DIR = Path("campaign_output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-N_BUCKETS = 6
-TOP_MATCH_PERCENT = 0.40
-RANDOM_STATE = 42
-
-# local model
 GEN_MODEL = "Qwen/Qwen2.5-0.5B-Instruct"
+RANDOM_STATE = 42
+random.seed(RANDOM_STATE)
 
 # -------------------------
 # campaign input
@@ -45,111 +40,48 @@ if not campaign:
     raise ValueError("Campaign cause cannot be empty.")
 
 # -------------------------
-# load data
+# load bucket csv
 # -------------------------
 
 print("Loading data...")
 df = pd.read_csv(INPUT_FILE)
 
 required_cols = [
-    "id", "first_name", "last_name", "email", "phone", "city", "state", "zip",
-    "dob", "age", "sex", "race", "insurance", "condition", "smoker",
-    "language", "opt_in_sms", "opt_in_email"
+    "Name of bucket",
+    "Count of bucket",
+    "Rational of the bucket",
+    "Suggested treatment",
+    "SQL"
 ]
 
 missing = [c for c in required_cols if c not in df.columns]
 if missing:
     raise ValueError(f"Missing required columns: {missing}")
 
-df = df[(df["opt_in_email"] == True) & (df["email"].notna())].copy()
-
-for col in ["condition", "insurance", "language", "city", "state"]:
-    df[col] = df[col].fillna("Unknown").astype(str).str.strip()
-
-df["age"] = pd.to_numeric(df["age"], errors="coerce").fillna(40)
-df["smoker"] = df["smoker"].fillna(False).astype(bool)
+df = df.fillna("Unknown").copy()
 
 # -------------------------
-# build profile text
+# turn each csv row into a bucket summary
 # -------------------------
 
-def profile(row: pd.Series) -> str:
-    return (
-        f"age {int(row['age'])} "
-        f"condition {row['condition']} "
-        f"insurance {row['insurance']} "
-        f"language {row['language']} "
-        f"city {row['city']} "
-        f"state {row['state']} "
-        f"smoker {'yes' if row['smoker'] else 'no'}"
-    )
+def summarize_bucket(row: pd.Series, bucket_id: int) -> dict:
+    try:
+        bucket_size = int(row["Count of bucket"])
+    except Exception:
+        bucket_size = 0
 
-df["profile"] = df.apply(profile, axis=1)
-
-# -------------------------
-# match users to campaign
-# -------------------------
-
-print("Matching users to campaign...")
-
-vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words="english")
-matrix = vectorizer.fit_transform(df["profile"].tolist() + [campaign])
-
-user_vecs = matrix[:-1]
-campaign_vec = matrix[-1]
-
-scores = cosine_similarity(user_vecs, campaign_vec).flatten()
-df["score"] = scores
-
-cutoff = df["score"].quantile(1 - TOP_MATCH_PERCENT)
-target = df[df["score"] >= cutoff].copy()
-
-if len(target) < N_BUCKETS:
-    raise ValueError(
-        f"Not enough matched users to create {N_BUCKETS} buckets. Found {len(target)}."
-    )
-
-# -------------------------
-# create buckets
-# -------------------------
-
-print("Creating buckets...")
-
-target_vecs = vectorizer.transform(target["profile"].tolist())
-
-kmeans = KMeans(
-    n_clusters=N_BUCKETS,
-    n_init=10,
-    random_state=RANDOM_STATE
-)
-
-target["bucket_id"] = kmeans.fit_predict(target_vecs)
-
-# -------------------------
-# summarize each bucket
-# -------------------------
-
-def safe_mode(series: pd.Series) -> str:
-    mode = series.mode(dropna=True)
-    return mode.iloc[0] if not mode.empty else "Unknown"
-
-def summarize(group: pd.DataFrame) -> dict:
     return {
-        "avg_age": round(group["age"].mean(), 1),
-        "age_min": int(group["age"].min()),
-        "age_max": int(group["age"].max()),
-        "condition": safe_mode(group["condition"]),
-        "insurance": safe_mode(group["insurance"]),
-        "language": safe_mode(group["language"]),
-        "city": safe_mode(group["city"]),
-        "state": safe_mode(group["state"]),
-        "smoker_rate": round(group["smoker"].mean() * 100, 1),
-        "size": int(len(group)),
+        "bucket_name": str(row["Name of bucket"]).strip(),
+        "bucket_rationale": str(row["Rational of the bucket"]).strip(),
+        "suggested_treatment": str(row["Suggested treatment"]).strip(),
+        "sql": str(row["SQL"]).strip(),
+        "size": bucket_size,
+        "bucket_id": bucket_id,
     }
 
 summaries = {
-    b: summarize(target[target["bucket_id"] == b])
-    for b in sorted(target["bucket_id"].unique())
+    idx: summarize_bucket(row, idx)
+    for idx, (_, row) in enumerate(df.iterrows())
 }
 
 # -------------------------
@@ -164,73 +96,96 @@ generator = pipeline(
 )
 
 # -------------------------
+# style helpers
+# -------------------------
+
+OPENING_STYLES = [
+    "warm and reassuring",
+    "practical and clear",
+    "encouraging and upbeat",
+    "friendly and conversational",
+    "supportive and calm",
+    "direct but caring",
+]
+
+CTA_STYLES = [
+    "invite the reader to take one simple next step",
+    "encourage a low-pressure follow-up action",
+    "suggest a practical next step without sounding pushy",
+    "make the next step feel easy and approachable",
+]
+
+BODY_FLAVORS = [
+    "sound human and natural, not corporate",
+    "include a little warmth and personality",
+    "feel specific rather than generic",
+    "avoid sounding like a template",
+    "sound like a helpful outreach message from a real care team",
+]
+
+# -------------------------
 # bucket angle so each bucket sounds different
 # -------------------------
 
 def bucket_angle(summary: dict, bucket_id: int) -> str:
-    age = summary["avg_age"]
-    condition = str(summary["condition"]).lower()
-    insurance = str(summary["insurance"]).lower()
-    language = str(summary["language"]).lower()
-    city = str(summary["city"])
-    state = str(summary["state"])
+    bucket_name = summary["bucket_name"].lower()
+    rationale = summary["bucket_rationale"].lower()
+    treatment = summary["suggested_treatment"].lower()
 
     angle_parts = []
 
-    if age < 30:
-        angle_parts.append("use a younger, concise, action-oriented tone")
-    elif age < 55:
-        angle_parts.append("use a practical, clear, everyday tone")
+    if "preventive" in bucket_name or "care gap" in bucket_name:
+        angle_parts.append("emphasize prevention, timely follow-up, and simple next steps")
+    elif "sms engagement" in bucket_name:
+        angle_parts.append("use a more responsive, conversational, action-oriented tone")
+    elif "no prior" in bucket_name or "no engagement" in bucket_name:
+        angle_parts.append("use a gentle, encouraging, low-pressure tone")
     else:
-        angle_parts.append("use a reassuring, supportive, easy-to-follow tone")
+        angle_parts.append("use a practical, clear, member-friendly tone")
 
-    if "medicaid" in insurance:
-        angle_parts.append("emphasize access, support, and easy next steps")
-    elif "medicare" in insurance:
-        angle_parts.append("emphasize clarity, trust, and guidance")
+    if "primary care" in treatment:
+        angle_parts.append("encourage reconnecting with a primary care provider")
+    elif "screening" in treatment or "wellness" in treatment:
+        angle_parts.append("focus on checkups, screenings, and prevention")
+    elif "outreach" in treatment:
+        angle_parts.append("make the message feel like a thoughtful reminder")
     else:
-        angle_parts.append("emphasize useful information and convenience")
+        angle_parts.append("keep the action step easy and realistic")
 
-    if "diabetes" in condition:
-        angle_parts.append("mention staying on track with ongoing care")
-    elif "anxiety" in condition or "stress" in condition:
-        angle_parts.append("sound supportive, calm, and encouraging")
-    elif "asthma" in condition or "respiratory" in condition:
-        angle_parts.append("emphasize prevention and staying prepared")
-    elif "hypertension" in condition or "heart" in condition:
-        angle_parts.append("sound steady, supportive, and preventive")
+    if "high risk" in rationale or "chronic" in rationale:
+        angle_parts.append("sound supportive and proactive")
+    elif "engagement" in rationale:
+        angle_parts.append("sound helpful and responsive")
     else:
-        angle_parts.append("focus on timely support and practical follow-up")
+        angle_parts.append("sound informative and easy to follow")
 
-    if "spanish" in language:
-        angle_parts.append("keep the wording especially simple and accessible")
-    elif "vietnamese" in language or "arabic" in language or "chinese" in language:
-        angle_parts.append("keep the wording very clear and easy to follow")
-    else:
-        angle_parts.append("keep the wording natural and human")
-
-    if city != "Unknown" and state != "Unknown":
-        angle_parts.append(f"make it feel locally relevant to {city}, {state}")
-
-    style_modes = [
-        "make it warm and supportive",
-        "make it direct and practical",
-        "make it encouraging and calm",
-        "make it informative and helpful",
-        "make it sound local and personal",
-        "make it sound like a helpful reminder",
-    ]
-    angle_parts.append(style_modes[bucket_id % len(style_modes)])
+    angle_parts.append(OPENING_STYLES[bucket_id % len(OPENING_STYLES)])
+    angle_parts.append(CTA_STYLES[bucket_id % len(CTA_STYLES)])
+    angle_parts.append(BODY_FLAVORS[bucket_id % len(BODY_FLAVORS)])
 
     return "; ".join(angle_parts)
+
+def bucket_hook(summary: dict, bucket_id: int) -> str:
+    bucket_name = summary["bucket_name"]
+    treatment = summary["suggested_treatment"]
+
+    hooks = [
+        f"make the email feel relevant to people in the {bucket_name} group",
+        f"naturally connect the message to {treatment.lower()}",
+        f"make the outreach feel timely and useful instead of routine",
+        f"sound like the message was written with this bucket in mind",
+        f"let the language feel a little more personal and less scripted",
+    ]
+    return hooks[bucket_id % len(hooks)]
 
 # -------------------------
 # prompt + generation
 # -------------------------
 
 def build_prompt(summary: dict, campaign_text: str, previous_subjects: list[str], bucket_id: int) -> str:
-    recent = " | ".join(previous_subjects[-5:]) if previous_subjects else "none"
+    recent = " | ".join(previous_subjects[-10:]) if previous_subjects else "none"
     angle = bucket_angle(summary, bucket_id)
+    hook = bucket_hook(summary, bucket_id)
 
     return f"""
 Write one outreach email for a healthcare campaign.
@@ -240,26 +195,34 @@ Campaign:
 
 This is for bucket {bucket_id}.
 
-Audience summary:
-- average age: {summary['avg_age']}
-- age range: {summary['age_min']} to {summary['age_max']}
-- common condition: {summary['condition']}
-- common insurance: {summary['insurance']}
-- common language: {summary['language']}
-- common location: {summary['city']}, {summary['state']}
-- smoker rate: {summary['smoker_rate']}%
+Bucket summary:
+- bucket name: {summary['bucket_name']}
+- rationale: {summary['bucket_rationale']}
+- suggested treatment: {summary['suggested_treatment']}
 - bucket size: {summary['size']}
 
 Writing guidance:
 - {angle}
+- {hook}
 
 Requirements:
 - make the email clearly related to the campaign
-- explain why the reader is receiving the email
+- explain in a natural way why the reader is receiving the email
 - include one clear next step
-- use 2 short paragraphs
+- use exactly 2 short paragraphs
 - do not use bullet points
 - do not use markdown
+- do not use hashtags
+- do not use placeholders like [Recipient Name], [Reader Name], [Member Name], or [Your Name]
+- do not begin with greetings like Dear _, Hi _, Hello _, Dear [Name], or Dear Member
+- do not write generic labels like "Subject line" or "Full Email Body"
+- do not sound like an ad, press release, or social media post
+- use normal sentence capitalization
+- do not write in all caps
+- keep punctuation and spacing clean
+- make the writing feel warm, natural, and specific
+- vary sentence openings and word choice
+- avoid repeating the same phrasing from prior emails
 - make this bucket feel distinct from the others
 - do not copy or sound too similar to these recent subjects: {recent}
 
@@ -270,14 +233,14 @@ Return only valid JSON:
 }}
 """.strip()
 
-def generate_raw(prompt: str, temperature: float = 0.85, max_new_tokens: int = 240) -> str:
+def generate_raw(prompt: str, temperature: float = 0.92, max_new_tokens: int = 240) -> str:
     result = generator(
         prompt,
         max_new_tokens=max_new_tokens,
         temperature=temperature,
         do_sample=True,
-        top_p=0.92,
-        repetition_penalty=1.10,
+        top_p=0.94,
+        repetition_penalty=1.08,
         num_return_sequences=1,
         return_full_text=False
     )[0]["generated_text"]
@@ -292,25 +255,129 @@ def extract_json(text: str):
 
     try:
         return json.loads(text)
-    except:
+    except Exception:
         pass
 
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if match:
         try:
             return json.loads(match.group(0))
-        except:
+        except Exception:
             pass
 
     return None
 
+def normalize_whitespace(text: str) -> str:
+    if not isinstance(text, str):
+        return ""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r" *\n *", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+def strip_wrapping_quotes(text: str) -> str:
+    if not isinstance(text, str):
+        return ""
+    text = text.strip()
+    text = text.strip('"').strip("'").strip("`")
+    return text.strip()
+
+def fix_spacing_before_punctuation(text: str) -> str:
+    text = re.sub(r"\s+([,.;:!?])", r"\1", text)
+    text = re.sub(r"([,.;:!?])([A-Za-z])", r"\1 \2", text)
+    return text
+
+def smart_sentence_case(text: str) -> str:
+    if not text:
+        return ""
+
+    if text.isupper():
+        text = text.lower()
+
+    chars = list(text)
+    capitalize_next = True
+
+    for i, ch in enumerate(chars):
+        if capitalize_next and ch.isalpha():
+            chars[i] = ch.upper()
+            capitalize_next = False
+        elif ch in ".!?":
+            capitalize_next = True
+        elif ch.isalpha():
+            capitalize_next = False
+
+    return "".join(chars)
+
+def normalize_subject_case(subject: str) -> str:
+    if not subject:
+        return ""
+
+    subject = normalize_whitespace(subject)
+    subject = strip_wrapping_quotes(subject)
+    subject = fix_spacing_before_punctuation(subject)
+
+    if subject.isupper():
+        subject = subject.lower()
+
+    parts = subject.split()
+    if parts:
+        normalized = []
+        for i, w in enumerate(parts):
+            if i == 0:
+                normalized.append(w.capitalize())
+            elif re.fullmatch(r"[A-Z]{2,}", w):
+                normalized.append(w.title())
+            else:
+                normalized.append(w)
+        subject = " ".join(normalized)
+
+    subject = re.sub(r"\s+", " ", subject).strip(" -:;,.\"'`")
+    return subject[:120]
+
+def normalize_body_case(body: str) -> str:
+    if not body:
+        return ""
+
+    paragraphs = [p.strip() for p in body.split("\n\n") if p.strip()]
+    cleaned = []
+
+    for p in paragraphs:
+        p = normalize_whitespace(p)
+        p = strip_wrapping_quotes(p)
+        p = fix_spacing_before_punctuation(p)
+
+        if p.isupper():
+            p = p.lower()
+
+        p = smart_sentence_case(p)
+        cleaned.append(p)
+
+    body = "\n\n".join(cleaned)
+
+    replacements = {
+        " i ": " I ",
+        "\ni ": "\nI ",
+        "\ni'm": "\nI'm",
+        " i've ": " I've ",
+        " i'll ": " I'll ",
+        " i'd ": " I'd ",
+    }
+    for old, new in replacements.items():
+        body = body.replace(old, new)
+
+    body = re.sub(r"\s+", " ", body.replace("\n\n", "<<<PARA>>>"))
+    body = body.replace("<<<PARA>>>", "\n\n")
+    body = re.sub(r"\n{3,}", "\n\n", body).strip()
+
+    return body
+
 def clean_subject(subject: str) -> str:
     if not isinstance(subject, str):
-        return "Care reminder"
+        return ""
 
-    subject = subject.strip().strip('"').strip()
+    subject = strip_wrapping_quotes(subject)
 
-    # remove obvious prompt/instruction leakage
     leak_patterns = [
         r"^\s*subject\s*:\s*",
         r"^\s*subject line\s*:\s*",
@@ -324,39 +391,130 @@ def clean_subject(subject: str) -> str:
     for pattern in leak_patterns:
         subject = re.sub(pattern, "", subject, flags=re.IGNORECASE)
 
-    # remove wrapping punctuation
-    subject = subject.strip(" -:;,.\"'`")
-    subject = re.sub(r"\s+", " ", subject)
-
-    # if model returned multiple lines, keep the first usable one
     if "\n" in subject:
         parts = [p.strip(" -:;,.\"'`") for p in subject.splitlines() if p.strip()]
         if parts:
             subject = parts[0]
 
-    if not subject:
-        subject = "Care reminder"
+    subject = normalize_subject_case(subject)
 
-    return subject[:120]
+    bad_subjects = {
+        "subject line",
+        "subject",
+        "email subject",
+        "care reminder",
+    }
+
+    if subject.lower() in bad_subjects:
+        return ""
+
+    return subject
 
 def clean_body(body: str) -> str:
     if not isinstance(body, str):
         return ""
 
-    body = body.strip().strip('"').strip()
+    body = strip_wrapping_quotes(body)
     body = body.replace("\\n", "\n")
-    body = re.sub(r"\n{3,}", "\n\n", body)
-    body = re.sub(r"[ \t]+", " ", body)
-    body = re.sub(r"\n +", "\n", body)
 
-    # remove prompty intro leakage if it appears at the top
     body = re.sub(r"^\s*body\s*:\s*", "", body, flags=re.IGNORECASE)
     body = re.sub(r"^\s*email\s+body\s*:\s*", "", body, flags=re.IGNORECASE)
+    body = re.sub(r"^\s*full\s+email\s+body\s*:\s*", "", body, flags=re.IGNORECASE)
 
-    return body.strip()
+    body = re.sub(
+        r"^\s*(dear|hi|hello)\s+[_\-\[\]A-Za-z]{0,20}[,\s]*\n*",
+        "",
+        body,
+        flags=re.IGNORECASE
+    )
+
+    body = normalize_whitespace(body)
+
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", body) if p.strip()]
+    if len(paragraphs) >= 2:
+        body = "\n\n".join(paragraphs[:2])
+    else:
+        body = paragraphs[0] if paragraphs else ""
+
+    body = normalize_body_case(body)
+    return body
+
+def has_bad_placeholders(text: str) -> bool:
+    bad_patterns = [
+        r"\[recipient.*?\]",
+        r"\[reader.*?\]",
+        r"\[your name\]",
+        r"\[member.*?\]",
+        r"\[name\]",
+        r"\bfull email body\b",
+        r"\bsubject line\b",
+        r"#\w+",
+        r"\bdear\s+[_\-\[]",
+        r"\bhi\s+[_\-\[]",
+        r"\bhello\s+[_\-\[]",
+    ]
+    text_lower = text.lower()
+    return any(re.search(p, text_lower, flags=re.IGNORECASE) for p in bad_patterns)
+
+def is_greeting_only_body(body: str) -> bool:
+    if not body:
+        return True
+
+    test = body.strip().lower()
+
+    bad_exact = {
+        "dear",
+        "dear _",
+        "dear __",
+        "dear [name]",
+        "dear member",
+        "hi",
+        "hi _",
+        "hello",
+        "hello _",
+    }
+    if test in bad_exact:
+        return True
+
+    stripped = re.sub(
+        r"^(dear|hi|hello)\s+[^\n,]{0,40}[,\s]*",
+        "",
+        test,
+        flags=re.IGNORECASE
+    ).strip()
+
+    words = re.findall(r"\w+", stripped)
+    if len(words) < 18:
+        return True
+
+    if not re.search(r"[.!?]", body):
+        return True
+
+    return False
+
+def count_phrase_overlap(text: str, prior_texts: list[str]) -> int:
+    if not text or not prior_texts:
+        return 0
+
+    text_ngrams = set()
+    words = re.findall(r"\w+", text.lower())
+    for i in range(len(words) - 2):
+        text_ngrams.add(" ".join(words[i:i+3]))
+
+    overlap = 0
+    for prior in prior_texts[-8:]:
+        prior_words = re.findall(r"\w+", prior.lower())
+        for i in range(len(prior_words) - 2):
+            ngram = " ".join(prior_words[i:i+3])
+            if ngram in text_ngrams:
+                overlap += 1
+    return overlap
 
 def vary_subject(subject: str, bucket_id: int) -> str:
     subject = clean_subject(subject)
+
+    if not subject:
+        return ""
 
     replacements = [
         ("Support for", ["Support for", "Help for", "Resources for"]),
@@ -372,7 +530,7 @@ def vary_subject(subject: str, bucket_id: int) -> str:
             subject = re.sub(rf"^{re.escape(base)}", picked, subject, flags=re.IGNORECASE)
             break
 
-    subject = re.sub(r"\s+", " ", subject).strip(" -:;,.\"'`")
+    subject = normalize_subject_case(subject)
     return subject[:120]
 
 def vary_body_wording(body: str, bucket_id: int) -> str:
@@ -384,11 +542,6 @@ def vary_body_wording(body: str, bucket_id: int) -> str:
             "please reach out to our office",
             "please get in touch with our office",
         ]),
-        (r"\bclear next step\b", [
-            "clear next step",
-            "simple next step",
-            "helpful next step",
-        ]),
         (r"\bwe are reaching out\b", [
             "we are reaching out",
             "our team is reaching out",
@@ -399,6 +552,16 @@ def vary_body_wording(body: str, bucket_id: int) -> str:
             "this may be helpful for your care",
             "this may be relevant to your health needs",
         ]),
+        (r"\blearn more\b", [
+            "learn more",
+            "find out more",
+            "get more information",
+        ]),
+        (r"\bnext step\b", [
+            "next step",
+            "next move",
+            "helpful next step",
+        ]),
     ]
 
     for pattern, options in swaps:
@@ -406,32 +569,60 @@ def vary_body_wording(body: str, bucket_id: int) -> str:
             replacement = options[bucket_id % len(options)]
             body = re.sub(pattern, replacement, body, count=1, flags=re.IGNORECASE)
 
+    body = clean_body(body)
     return body.strip()
 
-def looks_good(subject: str, body: str, campaign_text: str) -> bool:
-    if len(subject) < 4:
+def looks_good(subject: str, body: str, campaign_text: str, previous_bodies: list[str]) -> bool:
+    if not subject or len(subject) < 6:
         return False
 
-    if len(body) < 80:
+    if not body or len(body) < 120:
         return False
 
-    if body.count("\n\n") < 1:
+    if has_bad_placeholders(subject) or has_bad_placeholders(body):
+        return False
+
+    if is_greeting_only_body(body):
+        return False
+
+    if body.count("\n\n") != 1:
+        return False
+
+    subject_lower = subject.lower()
+    body_lower = body.lower()
+
+    bad_phrases = [
+        "millions of patients",
+        "important news",
+        "thank you! #",
+        "dear [",
+        "dear _",
+        "hi _",
+        "hello _",
+        "full email body",
+        "subject line",
+        "click here now",
+    ]
+    if any(p in subject_lower or p in body_lower for p in bad_phrases):
         return False
 
     campaign_words = [
         w.lower() for w in re.findall(r"\w+", campaign_text)
         if len(w) > 3
     ]
-    body_lower = body.lower()
-    subject_lower = subject.lower()
-
     overlap = sum(1 for w in campaign_words if w in body_lower or w in subject_lower)
     if overlap == 0 and campaign_text.lower() not in body_lower:
+        return False
+
+    if count_phrase_overlap(body, previous_bodies) > 4:
         return False
 
     return True
 
 def fallback_email(summary: dict, campaign_text: str, bucket_id: int):
+    bucket_name = summary["bucket_name"]
+    treatment = summary["suggested_treatment"]
+
     subject_options = [
         f"Support for {campaign_text}",
         f"Helpful update about {campaign_text}",
@@ -442,30 +633,46 @@ def fallback_email(summary: dict, campaign_text: str, bucket_id: int):
     ]
     subject = vary_subject(subject_options[bucket_id % len(subject_options)], bucket_id)
 
-    body = (
-        f"We are reaching out to share information related to {campaign_text}. "
-        f"This may be relevant to your care, and we wanted to make sure you have a clear next step.\n\n"
-        f"If you would like support or more information, please contact our office and our team can help."
-    )
-    body = vary_body_wording(body, bucket_id)
+    if not subject:
+        subject = normalize_subject_case(f"Support for {campaign_text}")
 
+    fallback_openers = [
+        f"We wanted to share information that may be useful for people in the {bucket_name} group.",
+        f"We're reaching out because this information may be especially relevant to members in the {bucket_name} group.",
+        f"This message is intended to share support and guidance that may be helpful for people in the {bucket_name} group.",
+        f"We're sharing this because the topic of {campaign_text} may be relevant for members in the {bucket_name} group.",
+    ]
+
+    fallback_ctas = [
+        f"If you'd like to take the next step, consider {treatment.lower()} or contacting your care team for more guidance.",
+        f"If this applies to you, a good next step may be to explore {treatment.lower()} or reach out to your health plan.",
+        f"If you'd like more support, consider {treatment.lower()} or talking with your care team about what makes sense for you.",
+        f"If you want to learn more, you may want to look into {treatment.lower()} or connect with your provider for follow-up.",
+    ]
+
+    body = (
+        f"{fallback_openers[bucket_id % len(fallback_openers)]} "
+        f"This outreach is related to {campaign_text} and is meant to offer a clear, helpful next step.\n\n"
+        f"{fallback_ctas[bucket_id % len(fallback_ctas)]}"
+    )
+
+    body = vary_body_wording(body, bucket_id)
     return subject, body
 
 # -------------------------
 # generate one email per bucket
 # -------------------------
 
-def generate_email(summary: dict, campaign_text: str, previous_subjects: list[str], bucket_id: int):
+def generate_email(summary: dict, campaign_text: str, previous_subjects: list[str], previous_bodies: list[str], bucket_id: int):
     prompt = build_prompt(summary, campaign_text, previous_subjects, bucket_id)
 
-    best_subject = None
-    best_body = None
+    candidates = []
 
-    for i in range(4):
+    for i in range(8):
         raw = generate_raw(
             prompt,
-            temperature=0.85 + (i * 0.05),
-            max_new_tokens=240
+            temperature=0.88 + (i * 0.03),
+            max_new_tokens=230
         )
 
         parsed = extract_json(raw)
@@ -475,14 +682,17 @@ def generate_email(summary: dict, campaign_text: str, previous_subjects: list[st
         subject = vary_subject(parsed.get("subject", ""), bucket_id)
         body = vary_body_wording(parsed.get("body", ""), bucket_id)
 
-        if looks_good(subject, body, campaign_text):
+        if looks_good(subject, body, campaign_text, previous_bodies):
             return subject, body
 
-        if subject and body and best_subject is None:
-            best_subject, best_body = subject, body
+        if subject and body and not is_greeting_only_body(body):
+            score = len(subject) + len(body) - (count_phrase_overlap(body, previous_bodies) * 20)
+            candidates.append((score, subject, body))
 
-    if best_subject and best_body:
-        return best_subject, best_body
+    if candidates:
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        _, subject, body = candidates[0]
+        return subject, body
 
     return fallback_email(summary, campaign_text, bucket_id)
 
@@ -494,6 +704,7 @@ print("Generating emails...")
 
 templates = []
 previous_subjects = []
+previous_bodies = []
 
 for bucket_id in sorted(summaries.keys()):
     summary = summaries[bucket_id]
@@ -502,12 +713,17 @@ for bucket_id in sorted(summaries.keys()):
         summary=summary,
         campaign_text=campaign,
         previous_subjects=previous_subjects,
+        previous_bodies=previous_bodies,
         bucket_id=bucket_id
     )
 
     previous_subjects.append(subject)
+    previous_bodies.append(body)
 
     templates.append({
+        "bucket_id": bucket_id,
+        "bucket_name": summary["bucket_name"],
+        "count_of_bucket": summary["size"],
         "subject": subject,
         "body": body
     })
