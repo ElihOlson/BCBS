@@ -37,9 +37,16 @@ class supabaseInteractions:
                 
 
                 for table in tables:
-                    cols = [r['column_name'] for r in rpc_res.data if r['table_name'] == table]
-                    #resultSchema.append(f"Table [{table}]: {', '.join(cols)}")
-                    resultSchema.append(f"{table}({','.join(cols)})")
+                    rows = [r for r in rpc_res.data if r['table_name'] == table]
+                    col_parts = []
+                    for r in rows:
+                        label = r['column_name']
+                        if r.get('is_primary_key'):
+                            label += ' [PK]'
+                        if r.get('foreign_table'):
+                            label += f" [FK -> {r['foreign_table']}.{r['foreign_column']}]"
+                        col_parts.append(label)
+                    resultSchema.append(f"Table [{table}]: {', '.join(col_parts)}")
                     
                 
                 return resultSchema
