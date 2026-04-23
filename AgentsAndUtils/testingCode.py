@@ -72,16 +72,16 @@ sqlagent = sqlAgent()
 bktagent = bucketingAgent()
 sbInteract = supabaseInteractions()
 
-prompt = "none"
 
 schema = sbInteract.getSchema()
 
-ans = bktagent.generateBuckets(prompt, schema)
 
-print("OUTPUT", ans)
+myBuckets = bktagent.generateBuckets("none", schema)
+
+print("OUTPUT: \n\n", myBuckets)
 
 try:
-    buckets = extract_bucket_payload(ans)
+    buckets = extract_bucket_payload(myBuckets)
     output_file = Path(__file__).resolve().parent / "bucket_output.csv"
     rows = write_bucket_csv(buckets, output_file)
 
