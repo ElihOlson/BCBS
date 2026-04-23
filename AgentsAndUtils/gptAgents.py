@@ -148,7 +148,7 @@ class bucketingAgent:
                 {"role": "system", "content": systemPrompt},
                 {"role": "user", "content": prompt},
             ],
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
             # max_tokens=500,
         )
         return chat_completion.choices[0].message.content
@@ -236,6 +236,12 @@ class bucketingAgent:
                         - Every bucket's SQL must include the universal guards (opt-in, no suppression, active member, active enrollment).
                         - Return member-level rows only. No aggregates in the bucket SQL itself — the aggregate (count) goes in `estimated_count`.
                         - If the brief's universe or the schema makes a given slicing dimension unusable, drop it silently and pick the next one — don't explain what you didn't do.
+                        - Use PostgreSQL syntax only (Supabase/Postgres).
+                        - Do NOT use MySQL-style interval syntax like `INTERVAL 180 DAY` or `INTERVAL 40 YEAR`.
+                        - Always write intervals like: `CURRENT_DATE - INTERVAL '180 days'`, `CURRENT_DATE - INTERVAL '40 years'`, `CURRENT_DATE - INTERVAL '25 years'`.
+                        - Bad example: `event_timestamp > CURRENT_DATE - INTERVAL 180 DAY`.
+                        - Good example: `event_timestamp > CURRENT_DATE - INTERVAL '180 days'`.
+                        - Before returning SQL, self-check for unquoted MySQL-style intervals and rewrite them to PostgreSQL interval literals.
 
                         OUTPUT FORMAT
 
