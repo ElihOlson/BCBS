@@ -97,6 +97,35 @@
         .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
         .modal-exit { opacity: 1; transform: scale(1); }
         .modal-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.15s ease-in; }
+        .wizard-stepper {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.5rem;
+            align-items: start;
+        }
+        .wizard-stepper > .absolute.z-0 {
+            top: 1.25rem;
+        }
+        .wizard-stepper > .relative.z-10.flex.flex-col.items-center.gap-3 {
+            width: 100%;
+            min-height: 6.25rem;
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+            cursor: pointer;
+        }
+        .wizard-stepper > .relative.z-10.flex.flex-col.items-center.gap-3 > div:first-child {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        .wizard-stepper > .relative.z-10.flex.flex-col.items-center.gap-3 > span:last-child {
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            line-height: 1.1;
+        }
+        .wizard-modal-window {
+            height: 90vh;
+        }
     </style>
 </head>
 <body class="bg-background text-on-background min-h-screen flex">
@@ -381,10 +410,10 @@
 <!-- Modal Overlays -->
 <!-- Data Review Modal -->
 <div id="data-review-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-<div class="bg-surface w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
 <!-- Modal Header: Progress Stepper -->
 <div class="bg-surface-container-low px-12 py-8 border-b-0">
-<div class="flex justify-between items-center relative">
+<div class="flex justify-between items-center relative wizard-stepper">
 <!-- Progress Line -->
 <div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
 <!-- Step 1: Active -->
@@ -479,10 +508,10 @@
 
 <!-- Smart Analyzer Modal -->
 <div id="smart-analyzer-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-<div class="bg-surface w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
 <!-- Modal Header: Progress Stepper -->
 <div class="bg-surface-container-low px-12 py-8 border-b-0">
-<div class="flex justify-between items-center relative">
+<div class="flex justify-between items-center relative wizard-stepper">
 <!-- Progress Line -->
 <div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
 <div class="absolute top-4 left-0 h-[2px] bg-primary z-0" style="width: calc(30% + 8px);"></div>
@@ -498,7 +527,7 @@
 <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
 <span class="text-xs font-bold">2</span>
 </div>
-<span class="text-xs font-bold uppercase tracking-widest text-primary">Smart Analyzer</span>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Analyzer</span>
 </div>
 <!-- Step 3 -->
 <div class="relative z-10 flex flex-col items-center gap-3">
@@ -634,57 +663,47 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 
 <!-- Bucketing Modal -->
 <div id="bucketing-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-<div class="bg-surface-container-lowest w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_12px_40px_rgba(26,28,28,0.15)] rounded-lg overflow-hidden border border-outline-variant/15">
-<!-- Modal Header -->
-<header class="px-8 py-6 border-b border-outline-variant/10 flex items-center justify-between bg-surface-container-low">
-<div>
-<span class="text-primary font-bold tracking-widest text-[10px] uppercase">Campaign Creation Wizard</span>
-<h2 class="text-2xl font-extrabold text-on-surface tracking-tight mt-1">Step 3: Bucketing</h2>
-</div>
-<button onclick="closeModal('bucketing-modal')" class="text-on-surface-variant hover:text-on-surface transition-colors">
-<span class="material-symbols-outlined text-3xl">close</span>
-</button>
-</header>
+<div class="bg-surface-container-lowest w-full max-w-4xl max-h-[90vh] wizard-modal-window flex flex-col shadow-[0_12px_40px_rgba(26,28,28,0.15)] rounded-lg overflow-hidden border border-outline-variant/15">
 <!-- Progress Bar -->
-<div class="bg-surface-container-low px-8 pt-2 pb-8">
-<div class="flex items-center justify-between relative max-w-2xl mx-auto">
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative wizard-stepper">
 <!-- Progress Line -->
-<div class="absolute top-1/2 left-0 w-full h-[2px] bg-outline-variant/20 -translate-y-1/2 z-0"></div>
-<div class="absolute top-1/2 left-0 w-1/2 h-[2px] bg-primary -translate-y-1/2 z-0"></div>
+<div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
+<div class="absolute top-4 left-0 w-1/2 h-[2px] bg-primary z-0"></div>
 <!-- Step 1: Complete -->
-<div class="relative z-10 flex flex-col items-center gap-2">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-sm">check</span>
 </div>
-<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Data Review</span>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
 </div>
 <!-- Step 2: Complete -->
-<div class="relative z-10 flex flex-col items-center gap-2">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-sm">check</span>
 </div>
-<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Analyzer</span>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Analyzer</span>
 </div>
 <!-- Step 3: Active -->
-<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center ring-4 ring-primary/20 shadow-md">
 <span class="text-xs font-bold">3</span>
 </div>
-<span class="text-[10px] font-black text-primary uppercase tracking-tighter">Bucketing</span>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Bucketing</span>
 </div>
 <!-- Step 4: Pending -->
-<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center">
 <span class="text-xs font-bold">4</span>
 </div>
-<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter opacity-50">Creative</span>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Creative</span>
 </div>
 <!-- Step 5: Pending -->
-<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center">
 <span class="text-xs font-bold">5</span>
 </div>
-<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter opacity-50">Launch</span>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Launch</span>
 </div>
 </div>
 </div>
@@ -767,10 +786,10 @@ Continue to Creative
 
 <!-- Email/Creative Modal -->
 <div id="email-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-<div class="bg-surface w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
 <!-- Modal Header -->
 <div class="bg-surface-container-low px-12 py-8 border-b-0">
-<div class="flex justify-between items-center relative">
+<div class="flex justify-between items-center relative wizard-stepper">
 <!-- Progress Line -->
 <div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
 <div class="absolute top-4 left-0 w-3/4 h-[2px] bg-primary z-0"></div>
@@ -887,10 +906,10 @@ Back to Bucketing
 
 <!-- Launch Modal -->
 <div id="launch-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-<div class="bg-surface w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
 <!-- Modal Header -->
 <div class="bg-surface-container-low px-12 py-8 border-b-0">
-<div class="flex justify-between items-center relative">
+<div class="flex justify-between items-center relative wizard-stepper">
 <!-- Progress Line -->
 <div class="absolute top-4 left-0 w-full h-[2px] bg-primary z-0"></div>
 <!-- Step 1: Complete -->
