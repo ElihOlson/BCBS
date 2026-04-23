@@ -10,6 +10,7 @@ load_dotenv(basedir / ".env")
 
 
 grokKey = os.getenv("GROK_API_KEY")
+grokURL = os.getenv("GROK_API_URL")
 spbsKey = os.getenv("SUPABASE_KEY2")
 spbsUrl = os.getenv("SUPABASE_URL2")
 
@@ -24,7 +25,7 @@ class sqlAgent:
         
 
         #self.client = Groq(api_key=grokKey)
-        self.client = OpenAI(api_key=grokKey,base_url= "https://api.mistral.ai/v1") # <-- swap this per provider )
+        self.client = OpenAI(api_key=grokKey,base_url= grokURL) # <-- swap this per provider )
 
         self.SUPABASE_URL = spbsUrl
         self.SUPABASE_KEY = spbsKey
@@ -210,7 +211,7 @@ class sqlAgent:
 class bucketingAgent:
     def __init__(self,):
 
-        self.client = OpenAI(api_key=grokKey, base_url="https://api.mistral.ai/v1")
+        self.client = OpenAI(api_key=grokKey, base_url=grokURL)
         self.SUPABASE_URL = spbsUrl
         self.SUPABASE_KEY = spbsKey
         DBClient = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)
