@@ -9,8 +9,8 @@ basedir = Path(__file__).resolve().parent
 load_dotenv(basedir / ".env")
 
 
-grokKey = os.getenv("GROK_API_KEY")
-grokURL = os.getenv("GROK_API_URL")
+grokKey = os.getenv("MISTRAL_API_KEY")
+grokURL = os.getenv("MISTRAL_API_URL")
 spbsKey = os.getenv("SUPABASE_KEY2")
 spbsUrl = os.getenv("SUPABASE_URL2")
 
@@ -49,160 +49,10 @@ class sqlAgent:
 
 
 
-    def sendMessage(self, prompt, systemPrompt):
-
-        outreach_strategy_schema = {
-    "name": "generate_outreach_strategy",
-    "description": "Generate a member segmentation outreach strategy with ranked buckets, SQL, and rationale.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "universe_definition": {
-                "type": "string",
-                "description": "Definition of the target population"
-            },
-            "primary_slicing_axis": {
-                "type": "string",
-                "description": "Main logic used to segment members"
-            },
-            "buckets": {
-                "type": "array",
-                "description": "List of mutually exclusive member buckets",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "rank": {
-                            "type": "integer",
-                            "description": "Priority rank of the bucket"
-                        },
-                        "name": {
-                            "type": "string",
-                            "description": "Bucket name"
-                        },
-                        "sql": {
-                            "type": "string",
-                            "description": "SQL query defining this bucket"
-                        },
-                        "estimated_count": {
-                            "type": ["integer", "null"],
-                            "description": "Estimated number of members in the bucket"
-                        },
-                        "rationale": {
-                            "type": "string",
-                            "description": "Why this bucket exists and why it matters"
-                        },
-                        "suggested_treatment": {
-                            "type": "string",
-                            "description": "Recommended outreach strategy"
-                        }
-                    },
-                    "required": [
-                        "rank",
-                        "name",
-                        "sql",
-                        "estimated_count",
-                        "rationale",
-                        "suggested_treatment"
-                    ]
-                }
-            },
-            "coverage_note": {
-                "type": "string",
-                "description": "Explanation of how much of the universe is covered"
-            }
-        },
-        "required": [
-            "universe_definition",
-            "primary_slicing_axis",
-            "buckets",
-            "coverage_note"
-        ]
-    }
-}
-
-        chat_completion = self.client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": systemPrompt},
-                {"role": "user", "content": prompt}],
-                tools=[{
-                    "type": "function",
-                    "function": outreach_strategy_schema
-                }],
-                tool_choice={"type": "function", "function": {"name": "generate_outreach_strategy"}},
-            model="llama-3.3-70b-versatile",
-            # max_tokens=500,
-        )
-        return chat_completion.choices[0].message.content
+    
 
 
-    def readDB(self,dbInfo):
-
-
-        #format llm output into a dict
-        colsList = self.formatter(dbInfo)
-        #print(f"COL LIST: {colsList}")
-
-        colString = ""
-
-        for x in range(len(colsList)):
-            if x == 0:
-                colString = colsList[x]
-            else:
-                colString = colString + ", " + colsList[x]
-        #print(f"COLSTRING: {colString}")
-
-        response = self.DBClient.table("Test1").select(colString).execute()
-
-        data = response.data
-        #print(data)
-        self.printer(data)
-
-    #take llm json and turn it into usable struct
-    def formatter(self,json_string):
-        
-        #check if string can be formatted
-
-        # Convert string to a Python dictionary
-        data = json.loads(json_string)
-
-        return data['columns']
-
-    def printer(self,data,limit = 20):
-        
-        
-        if not data:
-            print("No data")
-            return
-
-        total_rows = len(data)
-        rows = data[:limit]
-
-        # Use consistent column order (from first row)
-        columns = list(data[0].keys())
-
-        # Compute column widths (only from displayed rows)
-        col_widths = {
-            col: max(
-                len(col),
-                max(len(str(row.get(col, ""))) for row in rows)
-            )
-            for col in columns
-        }
-
-        # Header
-        header = " | ".join(col.ljust(col_widths[col]) for col in columns)
-        print(header)
-        print("-" * len(header))
-
-        # Rows
-        for row in rows:
-            print(" | ".join(str(row.get(col, "")).ljust(col_widths[col]) for col in columns))
-
-        # Footer info
-        if total_rows > limit:
-            print(f"\nShowing {limit} of {total_rows} rows...")
-        else:
-            print(f"\nTotal rows: {total_rows}")
+    
 #=====================================================================================#
 #==================================End of Functions===================================#
 #=====================================================================================#
@@ -218,24 +68,97 @@ class bucketingAgent:
 
         #self.schema = r"TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
 
-    def sendMessage(self, prompt='none', systemPrompt='none'):
+    
+    def sendMessage(self, prompt, systemPrompt):
+
+        outreach_strategy_schema = {
+            "name": "generate_outreach_strategy",
+            "description": "Generate a member segmentation outreach strategy with ranked buckets, SQL, and rationale.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "universe_definition": {
+                        "type": "string",
+                        "description": "Definition of the target population"
+                    },
+                    "primary_slicing_axis": {
+                        "type": "string",
+                        "description": "Main logic used to segment members"
+                    },
+                    "buckets": {
+                        "type": "array",
+                        "description": "List of mutually exclusive member buckets",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "rank": {
+                                    "type": "integer",
+                                    "description": "Priority rank of the bucket"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "Bucket name"
+                                },
+                                "sql": {
+                                    "type": "string",
+                                    "description": "SQL query defining this bucket"
+                                },
+                                "estimated_count": {
+                                    "type": ["integer", "null"],
+                                    "description": "Estimated number of members in the bucket"
+                                },
+                                "rationale": {
+                                    "type": "string",
+                                    "description": "Why this bucket exists and why it matters"
+                                },
+                                "suggested_treatment": {
+                                    "type": "string",
+                                    "description": "Recommended outreach strategy"
+                                }
+                            },
+                            "required": [
+                                "rank",
+                                "name",
+                                "sql",
+                                "estimated_count",
+                                "rationale",
+                                "suggested_treatment"
+                            ]
+                        }
+                    },
+                    "coverage_note": {
+                        "type": "string",
+                        "description": "Explanation of how much of the universe is covered"
+                    }
+                },
+                "required": [
+                    "universe_definition",
+                    "primary_slicing_axis",
+                    "buckets",
+                    "coverage_note"
+                ]
+            }
+        }
+
         chat_completion = self.client.chat.completions.create(
             messages=[
                 {"role": "system", "content": systemPrompt},
-                {"role": "user", "content": prompt},
-            ],
-            model="codestral-latest",
+                {"role": "user", "content": prompt}],
+            tools=[{
+                "type": "function",
+                "function": outreach_strategy_schema
+                }],
+            tool_choice={
+                "type": "function", "function": {"name": "generate_outreach_strategy"
+                }},
+            model="llama-3.3-70b-versatile",
             # max_tokens=500,
         )
         return chat_completion.choices[0].message.content
-    
+
     def generateBuckets(self,sqlQuery,schema):
         
-        #create bucket ideas given schema
-        #return sql queries for each bucket
-        #sqlQuery = "SELECT first_name, email FROM users WHERE LOWER(first_name) = 'joe';"
-        #schema = "TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
-
+        
         if isinstance(schema, list):
             schemaText = "\n".join(str(line) for line in schema)
         else:
@@ -407,6 +330,3 @@ class bucketingAgent:
 
         return self.sendMessage(sqlQuery,systemPrompt)
 
-
-    def userPromptedBuckets():
-        pass
