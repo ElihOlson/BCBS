@@ -1,6 +1,6 @@
 #from agents import sqlAgent, bucketingAgent
-from AgentsAndUtils.supabaseUtils import supabaseInteractions
-from AgentsAndUtils.codeAgents import *
+from supabaseUtils import supabaseInteractions
+from codeAgents import *
 import json
 import csv
 import re

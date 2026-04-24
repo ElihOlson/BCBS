@@ -22,17 +22,10 @@ spbsUrl = os.getenv("SUPABASE_URL2")
 class sqlAgent:
     def __init__(self):
         
-        
-
         #self.client = Groq(api_key=grokKey)
         self.client = OpenAI(api_key=grokKey,base_url= grokURL) # <-- swap this per provider )
 
-        self.SUPABASE_URL = spbsUrl
-        self.SUPABASE_KEY = spbsKey
-
-        DBClient = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)
-
-
+    
 
     def genSQL(self, prompt, schema):
         # Single call: return SQL or "INVALID" — avoids sending schema twice
@@ -62,96 +55,15 @@ class bucketingAgent:
     def __init__(self,):
 
         self.client = OpenAI(api_key=grokKey, base_url=grokURL)
-        self.SUPABASE_URL = spbsUrl
-        self.SUPABASE_KEY = spbsKey
-        DBClient = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)
-
         #self.schema = r"TABLE: users\nCOLUMNS: id,first_name,last_name,email,phone,city,state"
 
-    
-    def sendMessage(self, prompt, systemPrompt):
-
-        outreach_strategy_schema = {
-            "name": "generate_outreach_strategy",
-            "description": "Generate a member segmentation outreach strategy with ranked buckets, SQL, and rationale.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "universe_definition": {
-                        "type": "string",
-                        "description": "Definition of the target population"
-                    },
-                    "primary_slicing_axis": {
-                        "type": "string",
-                        "description": "Main logic used to segment members"
-                    },
-                    "buckets": {
-                        "type": "array",
-                        "description": "List of mutually exclusive member buckets",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "rank": {
-                                    "type": "integer",
-                                    "description": "Priority rank of the bucket"
-                                },
-                                "name": {
-                                    "type": "string",
-                                    "description": "Bucket name"
-                                },
-                                "sql": {
-                                    "type": "string",
-                                    "description": "SQL query defining this bucket"
-                                },
-                                "estimated_count": {
-                                    "type": ["integer", "null"],
-                                    "description": "Estimated number of members in the bucket"
-                                },
-                                "rationale": {
-                                    "type": "string",
-                                    "description": "Why this bucket exists and why it matters"
-                                },
-                                "suggested_treatment": {
-                                    "type": "string",
-                                    "description": "Recommended outreach strategy"
-                                }
-                            },
-                            "required": [
-                                "rank",
-                                "name",
-                                "sql",
-                                "estimated_count",
-                                "rationale",
-                                "suggested_treatment"
-                            ]
-                        }
-                    },
-                    "coverage_note": {
-                        "type": "string",
-                        "description": "Explanation of how much of the universe is covered"
-                    }
-                },
-                "required": [
-                    "universe_definition",
-                    "primary_slicing_axis",
-                    "buckets",
-                    "coverage_note"
-                ]
-            }
-        }
-
+    def sendMessage(self, prompt='none', systemPrompt='none'):
         chat_completion = self.client.chat.completions.create(
             messages=[
                 {"role": "system", "content": systemPrompt},
-                {"role": "user", "content": prompt}],
-            tools=[{
-                "type": "function",
-                "function": outreach_strategy_schema
-                }],
-            tool_choice={
-                "type": "function", "function": {"name": "generate_outreach_strategy"
-                }},
-            model="llama-3.3-70b-versatile",
+                {"role": "user", "content": prompt},
+            ],
+            model="codestral-latest",
             # max_tokens=500,
         )
         return chat_completion.choices[0].message.content
