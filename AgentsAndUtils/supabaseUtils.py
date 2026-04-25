@@ -66,10 +66,10 @@ class supabaseInteractions:
 
         try:
             conn = psycopg2.connect(
-                host="YOUR_HOST",
+                host="db.qnkrqseglxzveuvpipqb.supabase.co",
                 database="postgres",
                 user="postgres",
-                password="YOUR_PASSWORD",
+                password="Aiccorebcbs",
                 port=5432
             )
 
@@ -99,10 +99,7 @@ class supabaseInteractions:
     
 if __name__ == "__main__":
     DB = supabaseInteractions()
-    DB.getSchema()
-
-
-    sql = "SELECT m.* FROM marketing_ai.members m JOIN marketing_ai.addresses a ON m.address_id = a.address_id WHERE a.state = 'CA';"
+    sql = "SELECT DISTINCT m.member_id, m.first_name, m.last_name, m.email, m.phone_mobile FROM marketing_ai.members m JOIN marketing_ai.addresses a ON m.address_id = a.address_id JOIN marketing_ai.member_conditions mc ON m.member_id = mc.member_id WHERE LOWER(m.status) = 'active' AND m.date_of_birth BETWEEN (CURRENT_DATE - INTERVAL '40 years') AND (CURRENT_DATE - INTERVAL '25 years') AND LOWER(a.state) IN ('ne', 'ia') AND (LOWER(mc.icd10_code) LIKE 'e11%' OR LOWER(mc.icd10_code) LIKE 'i10%') AND EXISTS (SELECT 1 FROM marketing_ai.consent_preferences cp WHERE cp.member_id = m.member_id AND cp.sms_opt_in = TRUE) AND NOT EXISTS (SELECT 1 FROM marketing_ai.suppression_lists sl WHERE sl.member_id = m.member_id AND LOWER(sl.channel) = 'sms' AND (sl.expires_at IS NULL OR sl.expires_at > CURRENT_DATE)) AND EXISTS (SELECT 1 FROM marketing_ai.enrollments e WHERE e.member_id = m.member_id AND e.is_active = TRUE) AND EXISTS (SELECT 1 FROM marketing_ai.care_gaps cg WHERE cg.member_id = m.member_id AND LOWER(cg.status) = 'open' AND LOWER(cg.measure_category) = 'preventive')"
     result = DB.run_sql_query(sql)
     print(result)
 
