@@ -13,6 +13,7 @@ grokKey = os.getenv("MISTRAL_API_KEY")
 grokURL = os.getenv("MISTRAL_API_URL")
 spbsKey = os.getenv("SUPABASE_KEY2")
 spbsUrl = os.getenv("SUPABASE_URL2")
+debug_bucketing_prompt = os.getenv("DEBUG_BUCKETING_PROMPT", "false").lower() == "true"
 
 
 #get emails out
@@ -83,7 +84,114 @@ class bucketingAgent:
         )
         return chat_completion.choices[0].message.content
 
-    def generateBuckets(self,sqlQuery,schema):
+    def prompt_for_text_section(self, section_name, guidance_text):
+        """
+        Inputs:
+            section_name (str): Label for the terminal prompt section.
+            guidance_text (str): Example/instructions shown to the user for that section.
+        Purpose:
+            Collects one non-empty plain-text input from the terminal for a campaign section.
+        Returns:
+            str: User-entered plain-text value for the requested section.
+        """
+        prompt_text = (
+            f"\nEnter the {section_name} details in plain text.\n"
+            f"{guidance_text}\n"
+            f"{section_name}: "
+        )
+
+        while True:
+            user_input = input(prompt_text).strip()
+            if user_input:
+                return user_input
+            print(f"{section_name} cannot be empty. Please try again.")
+
+    def build_campaign_request(self, about_text, campaign_for_text, success_conditions_text):
+        """
+        Inputs:
+            about_text (str): Plain-text description of what the campaign is about.
+            campaign_for_text (str): Plain-text description of the target audience.
+            success_conditions_text (str): Plain-text description of metrics and weights.
+        Purpose:
+            Converts the three plain-text campaign sections into the required structured JSON brief.
+        Returns:
+            dict: Campaign request object with keys `about`, `for`, and `success_conditions`.
+        """
+        system_prompt = """You convert campaign planning notes into a JSON object.
+
+Return exactly one valid JSON object with this shape and no markdown fences:
+{
+  "about": {
+        "campaign_type": "...",
+        "channel": "...",
+        "message_goal": "..."
+  },
+  "for": {
+        "age_range": [min_age, max_age],
+        "location": ["STATE1", "STATE2"],
+        "conditions": ["condition1", "condition2"],
+        "engagement_level": "low|medium|high"
+  },
+  "success_conditions": {
+    "primary_metric": "...",
+    "secondary_metrics": ["..."],
+    "weights": {
+      "conversion_rate": number,
+      "open_rate": number,
+      "click_rate": number
+    }
+  }
+}
+
+Normalization rules:
+- Use uppercase two-letter state codes in location when states are mentioned.
+- Convert weight percentages to decimals when needed.
+- Ensure age_range is a two-item numeric list.
+- If a value is missing but strongly implied, infer the simplest safe value.
+- If engagement level is unspecified, set it to "medium".
+- Return JSON only.
+"""
+
+        user_prompt = (
+            f"About: {about_text}\n"
+            f"For: {campaign_for_text}\n"
+            f"Success Conditions: {success_conditions_text}"
+        )
+
+        response = self.sendMessage(user_prompt, system_prompt)
+        cleaned_response = response.strip().replace("```json", "").replace("```", "").strip()
+        return json.loads(cleaned_response)
+
+    def prompt_for_campaign_request(self):
+        """
+        Inputs:
+            None
+        Purpose:
+            Prompts the user for About, For, and Success Conditions in plain text,
+            then builds the normalized campaign request JSON object.
+        Returns:
+            dict: Structured campaign request ready to be embedded in the bucketing prompt.
+        """
+        about_text = self.prompt_for_text_section(
+            "About",
+            "Example: preventive care campaign over SMS with the goal of scheduling an appointment"
+        )
+        campaign_for_text = self.prompt_for_text_section(
+            "For",
+            "Example: members age 25 to 40 in Nebraska and Iowa with diabetes or hypertension, medium engagement"
+        )
+        success_conditions_text = self.prompt_for_text_section(
+            "Success Conditions",
+            "Example: optimize mostly for conversion rate, then open rate and click rate, with weights 60%, 25%, 15%"
+        )
+
+        return self.build_campaign_request(about_text, campaign_for_text, success_conditions_text)
+
+    def generateBuckets(self, sqlQuery, schema, campaign_request=None):
+        if campaign_request is None:
+            campaign_request = self.prompt_for_campaign_request()
+
+        campaign_request_text = json.dumps(campaign_request, ensure_ascii=False)
         
         
         if isinstance(schema, list):
@@ -127,13 +235,15 @@ class bucketingAgent:
 
             INPUT BRIEF
             
-            User request: User request: { "about": { "age_range": [25, 40], "location": ["NE", "IA"], "conditions": ["diabetes", "hypertension"], "engagement_level": "medium" }, "for": { "campaign_type": "preventive_care", "channel": "sms", "message_goal": "schedule_appointment" }, "success_conditions": { "primary_metric": "conversion_rate", "secondary_metrics": ["open_rate", "click_rate"], "weights": { "conversion_rate": 0.6, "open_rate": 0.25, "click_rate": 0.15 } } }
+            User request: """
+            + campaign_request_text +
+            r"""
             
             The brief has three parts:
 
-            - `about` — describes the TARGET UNIVERSE. Treat this as a hard filter: every bucket must be a subset of this universe.
+            - `about` — describes the CAMPAIGN. Use this to pick which dimensions to slice the universe by.
 
-            - `for` — describes the CAMPAIGN. Use this to pick which dimensions to slice the universe by. Different campaign_type / channel / message_goal combinations imply different slicing.
+            - `for` — describes the TARGET UNIVERSE. Treat this as a hard filter: every bucket must be a subset of this universe.
 
             - `success_conditions` — describes HOW TO SCORE a bucketing strategy. Use the weights to decide which dimensions matter most:
 
@@ -147,7 +257,7 @@ class bucketingAgent:
             
             Produce 4 to 7 buckets. Each bucket must:
 
-            1. Be a strict subset of the target universe defined by `about`.
+            1. Be a strict subset of the target universe defined by `for`.
 
             2. Be mutually exclusive from the other buckets on the dimension that most drives the primary success metric.
 
@@ -161,7 +271,7 @@ class bucketingAgent:
 
             - `name` — short, descriptive, human-readable.
 
-            - `sql` — a complete SELECT against `marketing_ai.` qualified tables, returning member-level columns only (member_id, first_name, last_name, email, phone_mobile, plus any feature columns that support the rationale). Must include the universal guards: sms_opt_in = TRUE, not in active sms suppressions, LOWER(members.status) = 'active', active enrollment via EXISTS.
+            - `sql` — a complete SELECT against `marketing_ai.` qualified tables, returning member-level columns only (member_id, first_name, last_name, email, phone_mobile, plus any feature columns that support the rationale). Must include the universal guards: EXISTS consent_preferences with cp.sms_opt_in = TRUE, not in active sms suppressions, LOWER(members.status) = 'active', active enrollment via EXISTS.
 
             - `estimated_count` — INTEGER. Your best estimate. If you cannot compute a real count, return a SQL comment at the top of the query with /* estimated_count: <reasoning> */ and set the field to null — never fabricate.
 
@@ -185,7 +295,7 @@ class bucketingAgent:
 
             5. Channel-preference conflict — only if the schema contains `members.preferred_channel`, you may split members where LOWER(members.preferred_channel) != 'sms' and sms_opt_in is TRUE. Do NOT reference `consent_preferences.preferred_channel`.
             
-            Do NOT slice primarily by age bracket, state, or condition subtype within the universe — those are already fixed by `about`. Slicing on them further produces buckets that don't deserve different treatment.
+            Do NOT slice primarily by age bracket, state, or condition subtype within the universe — those are already fixed by `for`. Slicing on them further produces buckets that don't deserve different treatment.
             
             HARD RULES
             
@@ -195,7 +305,11 @@ class bucketingAgent:
 
             - Every table reference qualified with `marketing_ai.`.
 
-            - Every bucket SQL must include universal guards: LOWER(members.status) = 'active', sms_opt_in = TRUE, NOT EXISTS active sms suppression, EXISTS active enrollment.
+            - Every bucket SQL must include universal guards: LOWER(members.status) = 'active', EXISTS consent_preferences with cp.sms_opt_in = TRUE, NOT EXISTS active sms suppression, EXISTS active enrollment.
+
+            - Never reference `m.sms_opt_in` (or `members.sms_opt_in`). SMS opt-in must only be enforced via `EXISTS (SELECT 1 FROM marketing_ai.consent_preferences cp WHERE cp.member_id = m.member_id AND cp.sms_opt_in = TRUE)`.
+
+            - Never use `(CURRENT_DATE - m.date_of_birth) BETWEEN INTERVAL ...` because it causes type errors. Age filtering must be written as `m.date_of_birth BETWEEN CURRENT_DATE - INTERVAL 'X years' AND CURRENT_DATE - INTERVAL 'Y years'`.
 
                         - SQL CONTRACT FOR EVERY BUCKET (mandatory):
                             1. Use `marketing_ai.members m` as the base table alias.
@@ -284,6 +398,13 @@ class bucketingAgent:
             }
  """
         )
+
+        if debug_bucketing_prompt:
+            print("\n" + "=" * 60)
+            print("BUCKETING SYSTEM PROMPT")
+            print("=" * 60)
+            print(systemPrompt)
+            print("=" * 60 + "\n")
         
 
         return self.sendMessage(sqlQuery,systemPrompt)

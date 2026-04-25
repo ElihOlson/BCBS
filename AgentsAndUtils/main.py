@@ -3,6 +3,7 @@ from supabaseUtils import supabaseInteractions
 from codeAgents import *
 import json
 import csv
+import re
 from pathlib import Path
 import traceback
 from io import StringIO
@@ -60,6 +61,64 @@ def json_to_csv(json_string):
         ])
     
     return output.getvalue()
+
+
+def sanitize_generated_sql(sql_query):
+    """
+    Inputs:
+        sql_query (str): A generated SQL statement.
+    Purpose:
+        Auto-corrects known invalid SQL patterns produced by the model.
+    Returns:
+        str: Sanitized SQL statement.
+    """
+    if not sql_query:
+        return sql_query
+
+    fixed_sql = sql_query
+
+    fixed_sql = re.sub(
+        r"\bm\.sms_opt_in\s*=\s*TRUE\b",
+        "EXISTS (SELECT 1 FROM marketing_ai.consent_preferences cp WHERE cp.member_id = m.member_id AND cp.sms_opt_in = TRUE)",
+        fixed_sql,
+        flags=re.IGNORECASE,
+    )
+
+    age_between_pattern = re.compile(
+        r"\(?\s*CURRENT_DATE\s*-\s*m\.date_of_birth\s*\)?\s+BETWEEN\s+INTERVAL\s+'(\d+)\s+years?'\s+AND\s+INTERVAL\s+'(\d+)\s+years?'",
+        flags=re.IGNORECASE,
+    )
+
+    def _replace_age_between(match):
+        first_year = int(match.group(1))
+        second_year = int(match.group(2))
+        older = max(first_year, second_year)
+        younger = min(first_year, second_year)
+        return f"m.date_of_birth BETWEEN CURRENT_DATE - INTERVAL '{older} years' AND CURRENT_DATE - INTERVAL '{younger} years'"
+
+    fixed_sql = age_between_pattern.sub(_replace_age_between, fixed_sql)
+
+    return fixed_sql
+
+
+def normalize_generated_bucket_sqls(raw_bucket_json):
+    """
+    Inputs:
+        raw_bucket_json (str): Raw JSON text from the bucketing agent.
+    Purpose:
+        Parses generated bucket JSON and sanitizes each bucket SQL before downstream use.
+    Returns:
+        str: Normalized JSON string with corrected SQL statements.
+    """
+    cleaned = raw_bucket_json.strip().replace("```json", "").replace("```", "").strip()
+    payload = json.loads(cleaned)
+
+    for bucket in payload.get("buckets", []):
+        bucket_sql = bucket.get("sql")
+        if isinstance(bucket_sql, str):
+            bucket["sql"] = sanitize_generated_sql(bucket_sql)
+
+    return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 def read_bucket_rows(bucket_csv_path):
@@ -186,6 +245,8 @@ sbInteract = supabaseInteractions()
 schema = sbInteract.getSchema()
 
 myBuckets = bktagent.generateBuckets("none", schema)
+
+myBuckets = normalize_generated_bucket_sqls(myBuckets)
 
 print("OUTPUT: \n\n", myBuckets)
 
