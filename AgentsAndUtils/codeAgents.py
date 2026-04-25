@@ -46,18 +46,23 @@ class emailAgent:
         #self.client = Groq(api_key=grokKey)
         self.client = OpenAI(api_key=grokKey,base_url= grokURL) # <-- swap this per provider )
 
-    
-
-    def genSQL(self, prompt, schema):
-        # Single call: return SQL or "INVALID" — avoids sending schema twice
-        sysPrompt = (
-            f"Schema:{schema}\n"
-            "Return a SQL query for the user request. Add (marketing_ai.) before all column names i.e. SELECT m.* FROM marketing_ai.members m"
-            "If the request cannot be answered from the schema, reply only: INVALID"
+    def sendMessage(self, prompt='none', systemPrompt='none'):
+        chat_completion = self.client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": systemPrompt},
+                {"role": "user", "content": prompt},
+            ],
+            model="codestral-latest",
+            # max_tokens=500,
         )
-        result = self.sendMessage(prompt, sysPrompt)
-        if result.strip().upper() == "INVALID":
-            return "Bad Request"
+        return chat_completion.choices[0].message.content
+
+    def genEmail(self, sqlQuery, campaighnDescription):
+        
+        sysPrompt = (f"you are an agent which generates engagement emails based on a bucket description and a recipients list in the form of an SQL query. Here is the SQL Query: {sqlQuery}. Here is the bucket description: {campaighnDescription}. Reply with a short and porfessional email for this group of people which maximises the campaighn goal.")
+
+        result = self.sendMessage("none", sysPrompt)
+
         return result
 
 
@@ -174,9 +179,11 @@ class bucketingAgent:
 
             3. Propensity score decile from propensity_scores if a relevant model_name exists (filter to the latest computed_at per member).
 
+            If no relevant propensity model exists for the filtered universe, do NOT create propensity-based buckets. Fall back to behavioral slicing using care_gaps, sms_events, and next_best_actions.
+
             4. Next-best-action already queued (next_best_actions with action_type related to scheduling/appointments and LOWER(status) = 'pending') — these members have an open recommendation and should be treated as a distinct bucket.
 
-            5. Channel-preference conflict — members whose LOWER(consent_preferences.preferred_channel) != 'sms' but sms_opt_in is still TRUE are a weaker bucket; split them out.
+            5. Channel-preference conflict — only if the schema contains `members.preferred_channel`, you may split members where LOWER(members.preferred_channel) != 'sms' and sms_opt_in is TRUE. Do NOT reference `consent_preferences.preferred_channel`.
             
             Do NOT slice primarily by age bracket, state, or condition subtype within the universe — those are already fixed by `about`. Slicing on them further produces buckets that don't deserve different treatment.
             
@@ -222,6 +229,8 @@ class bucketingAgent:
 
             - Always write intervals as: CURRENT_DATE - INTERVAL '180 days', CURRENT_DATE - INTERVAL '40 years'.
 
+            - Propensity usage guardrail: only use propensity_scores when a model_name is actually present for the currently filtered universe. If absent, skip propensity clauses entirely and redistribute buckets across other valid behavioral dimensions.
+
             - Before returning SQL, self-check every text comparison for missing LOWER() and every interval for correct PostgreSQL syntax. Fix any violations before outputting.
 
                         - FINAL SELF-CHECK BEFORE RETURNING EACH BUCKET SQL:
@@ -230,6 +239,7 @@ class bucketingAgent:
                             3. Includes all required universal guards.
                             4. Uses `m.member_id, m.first_name, m.last_name, m.email, m.phone_mobile` in the SELECT list.
                             5. Query is valid PostgreSQL and can run as-is.
+                            6. If propensity_scores is used, confirm model_name availability in-universe; otherwise remove propensity filters.
 
             - Before returning each bucket, perform a cardinality sanity check mentally: avoid producing a bucket if the combined hard filters are likely empty. Prefer broader but valid code-family filters over over-constrained filters that likely return zero.
 

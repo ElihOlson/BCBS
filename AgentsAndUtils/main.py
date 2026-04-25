@@ -10,6 +10,7 @@ from io import StringIO
 
 
 
+
 def json_to_csv(json_string):
     json_string = json_string.strip().replace("```json", "").replace("```", "").strip()
     data = json.loads(json_string)
@@ -82,10 +83,20 @@ except Exception as e:
     print(traceback.format_exc())
 
 
+#get all SQL queries and append into list
+sqlList = []
+bucketList = myBuckets["buckets"]
+for bucket in bucketList:
+    query = bucket["sql"]
+    rationale = bucket["rationale"]
+    sqlList.append([query,rationale])
 
 
 
-
-
+#query, desc\
+desc = r'{ "about": { "age_range": [25, 40], "location": ["NE", "IA"], "conditions": ["diabetes", "hypertension"], "engagement_level": "medium" }, "for": { "campaign_type": "preventive_care", "channel": "sms", "message_goal": "schedule_appointment" }, "success_conditions": { "primary_metric": "conversion_rate", "secondary_metrics": ["open_rate", "click_rate"], "weights": { "conversion_rate": 0.6, "open_rate": 0.25, "click_rate": 0.15 } } }'
+for x in sqlList:
+    email = emailAgent.genEmail(x[0],[1])
+    print(f"EMAILS:\n\n{email}\n")
 
 
