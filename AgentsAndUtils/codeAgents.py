@@ -94,6 +94,8 @@ class bucketingAgent:
  
             - Conditions are in `member_conditions` (joined by member_id, with icd10_code). Do not invent a `member_features` table.
             - State/location comes through `members -> addresses` (addresses.state). There is no `members.state` column.
+            - `addresses` does not contain member_id. Link location through `members.address_id = addresses.address_id`. Never reference `addresses.member_id`.
+            - `member_conditions.icd10_code` is a coded field. Never filter it with free-text disease names like '%diabetes%' or '%hypertension%'. Use ICD code filters such as IN ('e11','i10') or family prefixes like LIKE 'e11%' / LIKE 'i10%'.
             - Age must be computed from `members.date_of_birth` against CURRENT_DATE.
             - SMS opt-in lives in `consent_preferences.sms_opt_in`. Required for every bucket.
             - Active suppression lives in `suppression_lists` where LOWER(channel) = 'sms' and (expires_at IS NULL OR expires_at > CURRENT_DATE). Required exclusion for every bucket.
@@ -105,6 +107,7 @@ class bucketingAgent:
             - The schema includes a `query_pattern` field for every column. This is a mandatory instruction on how to filter that column. Follow it exactly — do not override it with your own judgment.
             - If query_pattern says LIKE, use LIKE. If it says exact match, use exact match. If it says EXISTS only, never use it in a WHERE clause directly.
             - Any column whose query_pattern contains 'Free-text or clinical description' must always be filtered with LOWER(column) LIKE '%keyword%'. Never use = for these columns under any circumstance, even if the user provides what looks like an exact value.
+            - If the user supplies plain-language conditions (e.g., diabetes, hypertension), translate them to code filters for coded columns before writing SQL.
             - Before finalizing any SQL, check every column reference against the schema. If a column does not exist on the table being queried, find the correct table and access it via EXISTS subquery.
 
             INPUT BRIEF
@@ -143,7 +146,7 @@ class bucketingAgent:
 
             - `name` — short, descriptive, human-readable.
 
-            - `sql` — a complete SELECT against `marketing_ai.` qualified tables, returning member-level columns only (member_id, first_name, last_name, phone_mobile, plus any feature columns that support the rationale). Must include the universal guards: sms_opt_in = TRUE, not in active sms suppressions, LOWER(members.status) = 'active', active enrollment via EXISTS.
+            - `sql` — a complete SELECT against `marketing_ai.` qualified tables, returning member-level columns only (member_id, first_name, last_name, email, phone_mobile, plus any feature columns that support the rationale). Must include the universal guards: sms_opt_in = TRUE, not in active sms suppressions, LOWER(members.status) = 'active', active enrollment via EXISTS.
 
             - `estimated_count` — INTEGER. Your best estimate. If you cannot compute a real count, return a SQL comment at the top of the query with /* estimated_count: <reasoning> */ and set the field to null — never fabricate.
 
@@ -177,6 +180,16 @@ class bucketingAgent:
 
             - Every bucket SQL must include universal guards: LOWER(members.status) = 'active', sms_opt_in = TRUE, NOT EXISTS active sms suppression, EXISTS active enrollment.
 
+                        - SQL CONTRACT FOR EVERY BUCKET (mandatory):
+                            1. Use `marketing_ai.members m` as the base table alias.
+                            2. SELECT exactly these member columns at minimum: `m.member_id, m.first_name, m.last_name, m.email, m.phone_mobile`.
+                            3. Implement location only through `members.address_id = addresses.address_id`.
+                            4. Implement condition logic through `member_conditions.member_id = members.member_id`.
+                            5. For ICD filters, always compare normalized codes using `LOWER(mc.icd10_code)` with exact code sets or code-family prefixes (e.g. `LIKE 'e11%'`, `LIKE 'i10%'`).
+                            6. Never use free-text disease-name matching against `icd10_code` (forbidden examples: `%diabetes%`, `%hypertension%`).
+                            7. Use `EXISTS` / `NOT EXISTS` for one-to-many related tables.
+                            8. Return syntactically complete PostgreSQL `SELECT` statements only.
+
             - Always use SELECT DISTINCT for all bucket SQLs.
 
             - Never use JOIN on one-to-many tables (care_gaps, sms_events, consent_preferences, suppression_lists, enrollments). Always use EXISTS (SELECT 1 FROM ... WHERE ...) instead.
@@ -201,7 +214,20 @@ class bucketingAgent:
 
             - Before returning SQL, self-check every text comparison for missing LOWER() and every interval for correct PostgreSQL syntax. Fix any violations before outputting.
 
+                        - FINAL SELF-CHECK BEFORE RETURNING EACH BUCKET SQL:
+                            1. No reference to `addresses.member_id`.
+                            2. No free-text disease-name filters on `icd10_code`.
+                            3. Includes all required universal guards.
+                            4. Uses `m.member_id, m.first_name, m.last_name, m.email, m.phone_mobile` in the SELECT list.
+                            5. Query is valid PostgreSQL and can run as-is.
+
+            - Before returning each bucket, perform a cardinality sanity check mentally: avoid producing a bucket if the combined hard filters are likely empty. Prefer broader but valid code-family filters over over-constrained filters that likely return zero.
+
+            - If a requested demographic filter does not materially partition the data (for example all eligible rows are in one state), do not over-slice on that demographic. Prioritize behavioral signals for bucket differentiation.
+
             - Remove all formatting from SQL — return every SQL string as a single flat line with no newlines or indentation.
+
+            - For `estimated_count`, do not fabricate values. If uncertain, return null.
             
             OUTPUT FORMAT
             
