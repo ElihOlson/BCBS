@@ -40,15 +40,25 @@ class sqlAgent:
         return result
 
 
-
+class emailAgent:
+    def __init__(self):
+        
+        #self.client = Groq(api_key=grokKey)
+        self.client = OpenAI(api_key=grokKey,base_url= grokURL) # <-- swap this per provider )
 
     
 
-
-    
-#=====================================================================================#
-#==================================End of Functions===================================#
-#=====================================================================================#
+    def genSQL(self, prompt, schema):
+        # Single call: return SQL or "INVALID" — avoids sending schema twice
+        sysPrompt = (
+            f"Schema:{schema}\n"
+            "Return a SQL query for the user request. Add (marketing_ai.) before all column names i.e. SELECT m.* FROM marketing_ai.members m"
+            "If the request cannot be answered from the schema, reply only: INVALID"
+        )
+        result = self.sendMessage(prompt, sysPrompt)
+        if result.strip().upper() == "INVALID":
+            return "Bad Request"
+        return result
 
 
 class bucketingAgent:

@@ -66,6 +66,7 @@ myBuckets = bktagent.generateBuckets("none", schema)
 
 print("OUTPUT: \n\n", myBuckets)
 
+#write content to csv
 try:
     output_file = Path(__file__).resolve().parent / "bucket_output.csv"
     response = json_to_csv(myBuckets)
@@ -79,6 +80,8 @@ except Exception as e:
     print(f"Error: {e}")
 
     print(traceback.format_exc())
+
+
 
 
 
