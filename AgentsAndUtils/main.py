@@ -217,8 +217,9 @@ except Exception as e:
 
 #query, desc\
 desc = r'{ "about": { "age_range": [25, 40], "location": ["NE", "IA"], "conditions": ["diabetes", "hypertension"], "engagement_level": "medium" }, "for": { "campaign_type": "preventive_care", "channel": "sms", "message_goal": "schedule_appointment" }, "success_conditions": { "primary_metric": "conversion_rate", "secondary_metrics": ["open_rate", "click_rate"], "weights": { "conversion_rate": 0.6, "open_rate": 0.25, "click_rate": 0.15 } } }'
+agent = emailAgent()
 for x in sqlList:
-    email = emailAgent.genEmail(x[0], x[1])
+    email = agent.genEmail(x[0], x[1])
     print(f"EMAILS:\n\n{email}\n")
 
 
