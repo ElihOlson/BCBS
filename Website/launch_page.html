@@ -217,7 +217,9 @@
 <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Campaign Dashboard</h2>
 <p class="text-on-surface-variant font-medium mt-1">Manage and monitor your enterprise outreach efforts.</p>
 </div>
-<a href="#" onclick="openModal('data-review-modal')" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
+
+<!-- Start Campaign Wizard button below -->
+<a href="#" onclick="startCampaign()" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
 <span class="material-symbols-outlined" data-icon="magic_button">magic_button</span>
 <span>Start Campaign Wizard</span>
 </a>
@@ -233,7 +235,7 @@
 <h3 class="font-bold text-on-surface">About</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Campaign Narrative</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Describe the core message and tone of this campaign..."></textarea>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40 campaign-input" placeholder="Describe the core message and tone of this campaign..." name="campaign_about" id="campaign_about"></textarea>
 </div>
 <!-- Input Card 2 -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
@@ -244,7 +246,7 @@
 <h3 class="font-bold text-on-surface">For</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Target Audience Segment</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Define the industry, job titles, and firmographics..."></textarea>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40 campaign-input" placeholder="Define the industry, job titles, and firmographics..." name="campaign_for" id="campaign_for"></textarea>
 </div>
 <!-- Input Card 3 -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
@@ -255,7 +257,7 @@
 <h3 class="font-bold text-on-surface">Success Conditions</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Key Performance Indicators</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40 campaign-input" placeholder="List the metrics that define a 'Win' for this project..." name="campaign_sConditions" id="campaign_sConditions"></textarea>
 </div>
 </div>
 <!-- Previous Campaigns Table -->
@@ -466,7 +468,7 @@
 <div class="grid grid-cols-2 gap-6">
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Campaign Name</label>
-<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Q4 Enterprise Outreach_v2</div>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20 " id="results_container">Q4 Enterprise Outreach_v2</div>
 </div>
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Source Database</label>
@@ -646,6 +648,9 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 </div>
 <!-- Quick Actions -->
 <div class="bg-surface-container-low p-5 rounded-lg space-y-3">
+
+
+<!-- Trigger Bucketing agent here -->
 <a href="#" onclick="openModal('bucketing-modal'); closeModal('smart-analyzer-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
 <span class="font-semibold">Continue to Bucketing</span>
 <span class="material-symbols-outlined">arrow_forward</span>
@@ -1128,6 +1133,56 @@ document.addEventListener('keydown', function(event) {
         });
     }
 });
+
+function sendData() {
+    let about = document.getElementById("campaign_about").value;
+    let forText = document.getElementById("campaign_for").value;
+    let sCond = document.getElementById("campaign_sCond").value;
+
+    fetch("/submit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            about: about,
+            for: forText,
+            success: sCond
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayCINFO(data.info);
+    });
+}
+
+//updates first page of data modal
+function displayCINFO(info) {
+    const container = document.getElementById("results_container");
+
+    // Clear old content
+    container.innerHTML = "";
+
+    // Add each person
+    info.forEach(x => {
+        const p = document.createElement("p");
+        p.textContent = x;
+        container.appendChild(p);
+    });
+}
+
+//id="results_container"
+
+//Start of campaign desiner
+function startCampaign() {
+    
+    //send campaign data to backend
+    sendData()
+    
+    openModal('data-review-modal');
+    
+}
+
 </script>
 
 </body></html>

@@ -1,5 +1,5 @@
 #from agents import sqlAgent, bucketingAgent
-from supabaseUtils import supabaseInteractions
+from supabaseUtils import *
 from codeAgents import *
 import json
 import csv
@@ -237,50 +237,78 @@ def export_sql_results(bucket_rows, output_csv_path, supabase_client):
 
 
 
-sqlagent = sqlAgent()
-bktagent = bucketingAgent()
-sbInteract = supabaseInteractions()
+
+#============================
+#======FLASK Functions=======
+#============================
 
 
-schema = sbInteract.getSchema()
+#checks if user request is valid
+def flaskTriggerSmartAnalyzer():
+    pass
 
-myBuckets = bktagent.generateBuckets("none", schema)
+#descriptor = [about, forWho, sucess]
+#actually triggers bucketing + email creation in one shot
+def flaskTriggerBucketing(descriptor: list):
+    sqlagent = sqlAgent()
+    bktagent = bucketingAgent()
+    sbInteract = supabaseInteractions()
 
-myBuckets = normalize_generated_bucket_sqls(myBuckets)
-
-print("OUTPUT: \n\n", myBuckets)
-
-#write content to csv
-try:
-    sqlList = []
-    output_file = Path(__file__).resolve().parent / "bucket_output.csv"
-    sql_results_file = Path(__file__).resolve().parent / "SQL_results.csv"
-    response = json_to_csv(myBuckets)
-
-    print("\n\n\n"+response)
-    output_file.write_text(response, encoding="utf-8", newline="")
-
-    # Reuse original flow: pull SQL + rationale pairs into sqlList.
-    bucket_rows = read_bucket_rows(output_file)
-    for bucket in bucket_rows:
-        sqlList.append([bucket["sql"], bucket["rationale"]])
-
-    export_sql_results(bucket_rows, sql_results_file, sbInteract)
-    #print(f"\n\n{rows[:][4]}\n\n")
-
-except Exception as e:
-    sqlList = []
-    print("Could not parse AI response into CSV")
-    print(f"Error: {e}")
-
-    print(traceback.format_exc())
+    #get schema from supabase
+    schema = sbInteract.getSchema()
 
 
-#query, desc\
-desc = r'{ "about": { "age_range": [25, 40], "location": ["NE", "IA"], "conditions": ["diabetes", "hypertension"], "engagement_level": "medium" }, "for": { "campaign_type": "preventive_care", "channel": "sms", "message_goal": "schedule_appointment" }, "success_conditions": { "primary_metric": "conversion_rate", "secondary_metrics": ["open_rate", "click_rate"], "weights": { "conversion_rate": 0.6, "open_rate": 0.25, "click_rate": 0.15 } } }'
-agent = emailAgent()
-for x in sqlList:
-    email = agent.genEmail(x[0], x[1])
-    print(f"EMAILS:\n\n{email}\n")
+    #create formatted desc
+    descriptor = bktagent.build_campaign_request(descriptor[0],descriptor[1],descriptor[2])
+
+    #create buckets given schema, campaign desc generated inside class
+    myBuckets = bktagent.generateBuckets(campaign_request = descriptor, schema = schema)
+
+    #formats bucket response
+    myBuckets = normalize_generated_bucket_sqls(myBuckets)
+
+    print("OUTPUT: \n\n", myBuckets)
+
+    #write content to csv, write content to sqlList
+    try:
+        sqlList = []
+        output_file = Path(__file__).resolve().parent / "bucket_output.csv"
+        sql_results_file = Path(__file__).resolve().parent / "SQL_results.csv"
+        response = json_to_csv(myBuckets)
+
+        print("\n\n\n"+response)
+        output_file.write_text(response, encoding="utf-8", newline="")
+
+        # Reuse original flow: pull SQL + rationale pairs into sqlList.
+        bucket_rows = read_bucket_rows(output_file)
+        for bucket in bucket_rows:
+            sqlList.append([bucket["sql"], bucket["rationale"]])
+
+        export_sql_results(bucket_rows, sql_results_file, sbInteract)
+        #print(f"\n\n{rows[:][4]}\n\n")
+
+    except Exception as e:
+        sqlList = []
+        print("Could not parse AI response into CSV")
+        print(f"Error: {e}")
+
+        print(traceback.format_exc())
+
+
+    #query, desc\
+    #sqlList = [query,rationale]
+    #desc = r'{ "about": { "age_range": [25, 40], "location": ["NE", "IA"], "conditions": ["diabetes", "hypertension"], "engagement_level": "medium" }, "for": { "campaign_type": "preventive_care", "channel": "sms", "message_goal": "schedule_appointment" }, "success_conditions": { "primary_metric": "conversion_rate", "secondary_metrics": ["open_rate", "click_rate"], "weights": { "conversion_rate": 0.6, "open_rate": 0.25, "click_rate": 0.15 } } }'
+    agent = emailAgent()
+    for x in sqlList:
+        email = agent.genEmail(x[0], x[1])
+        print(f"EMAILS:\n\n{email}\n")
+
+
+
+
+
+
+
+
 
 

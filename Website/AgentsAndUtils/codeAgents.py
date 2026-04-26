@@ -119,38 +119,38 @@ class bucketingAgent:
         """
         system_prompt = """You convert campaign planning notes into a JSON object.
 
-Return exactly one valid JSON object with this shape and no markdown fences:
-{
-  "about": {
-        "campaign_type": "...",
-        "channel": "...",
-        "message_goal": "..."
-  },
-  "for": {
-        "age_range": [min_age, max_age],
-        "location": ["STATE1", "STATE2"],
-        "conditions": ["condition1", "condition2"],
-        "engagement_level": "low|medium|high"
-  },
-  "success_conditions": {
-    "primary_metric": "...",
-    "secondary_metrics": ["..."],
-    "weights": {
-      "conversion_rate": number,
-      "open_rate": number,
-      "click_rate": number
-    }
-  }
-}
+            Return exactly one valid JSON object with this shape and no markdown fences:
+            {
+            "about": {
+                    "campaign_type": "...",
+                    "channel": "...",
+                    "message_goal": "..."
+            },
+            "for": {
+                    "age_range": [min_age, max_age],
+                    "location": ["STATE1", "STATE2"],
+                    "conditions": ["condition1", "condition2"],
+                    "engagement_level": "low|medium|high"
+            },
+            "success_conditions": {
+                "primary_metric": "...",
+                "secondary_metrics": ["..."],
+                "weights": {
+                "conversion_rate": number,
+                "open_rate": number,
+                "click_rate": number
+                }
+            }
+            }
 
-Normalization rules:
-- Use uppercase two-letter state codes in location when states are mentioned.
-- Convert weight percentages to decimals when needed.
-- Ensure age_range is a two-item numeric list.
-- If a value is missing but strongly implied, infer the simplest safe value.
-- If engagement level is unspecified, set it to "medium".
-- Return JSON only.
-"""
+            Normalization rules:
+            - Use uppercase two-letter state codes in location when states are mentioned.
+            - Convert weight percentages to decimals when needed.
+            - Ensure age_range is a two-item numeric list.
+            - If a value is missing but strongly implied, infer the simplest safe value.
+            - If engagement level is unspecified, set it to "medium".
+            - Return JSON only.
+            """
 
         user_prompt = (
             f"About: {about_text}\n"
@@ -187,7 +187,7 @@ Normalization rules:
 
         return self.build_campaign_request(about_text, campaign_for_text, success_conditions_text)
 
-    def generateBuckets(self, sqlQuery, schema, campaign_request=None):
+    def generateBuckets(self, schema, campaign_request=None):
         if campaign_request is None:
             campaign_request = self.prompt_for_campaign_request()
 
@@ -407,5 +407,5 @@ Normalization rules:
             print("=" * 60 + "\n")
         
 
-        return self.sendMessage(sqlQuery,systemPrompt)
+        return self.sendMessage(systemPrompt=systemPrompt)
 

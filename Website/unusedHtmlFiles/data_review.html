@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Campaign Architect - Campaign Creation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#fffcff",
+              "on-primary": "#ffffff",
+              "inverse-primary": "#a4c9ff",
+              "error-container": "#ffdad6",
+              "secondary-fixed": "#e3e2e2",
+              "primary-fixed-dim": "#a4c9ff",
+              "outline-variant": "#c0c7d4",
+              "on-secondary-container": "#646464",
+              "secondary-fixed-dim": "#c7c6c6",
+              "surface-container": "#eeeeed",
+              "on-surface-variant": "#414752",
+              "surface-container-high": "#e8e8e7",
+              "background": "#f9f9f8",
+              "surface": "#f9f9f8",
+              "tertiary-container": "#bc5800",
+              "on-primary-fixed-variant": "#004884",
+              "on-primary-fixed": "#001c39",
+              "inverse-surface": "#2f3130",
+              "primary-fixed": "#d4e3ff",
+              "on-primary-container": "#fefcff",
+              "surface-bright": "#f9f9f8",
+              "error": "#ba1a1a",
+              "on-secondary-fixed-variant": "#464747",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f4f4f3",
+              "on-tertiary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "on-secondary-fixed": "#1b1c1c",
+              "secondary": "#5e5e5e",
+              "tertiary-fixed-dim": "#ffb68b",
+              "surface-tint": "#005fac",
+              "surface-dim": "#dadad9",
+              "on-tertiary-fixed": "#321200",
+              "tertiary": "#964500",
+              "tertiary-fixed": "#ffdbc8",
+              "on-error": "#ffffff",
+              "surface-variant": "#e2e2e1",
+              "primary": "#005da9",
+              "surface-container-highest": "#e2e2e1",
+              "outline": "#717784",
+              "on-surface": "#1a1c1c",
+              "inverse-on-surface": "#f1f1f0",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#e3e2e2",
+              "on-tertiary-fixed-variant": "#753400",
+              "on-secondary": "#ffffff",
+              "primary-container": "#0176d3"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #005da9 0%, #0176d3 100%);
+        }
+        .glass-sidebar {
+            background: rgba(226, 226, 225, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .custom-shadow {
+            box-shadow: 0 12px 40px rgba(26, 28, 28, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body">
+<!-- Background Dashboard (Dimmed) -->
+<div class="fixed inset-0 z-0 opacity-40 grayscale pointer-events-none">
+<!-- TopNavBar Mock -->
+<header class="flex items-center justify-between px-6 h-14 w-full bg-slate-50 border-b-0 shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-blue-700">Logical CRM</span>
+<nav class="flex gap-6">
+<span class="text-blue-700 border-b-2 border-blue-600 pb-1 font-sans text-sm font-medium tracking-tight">Dashboard</span>
+<span class="text-slate-600 font-sans text-sm font-medium tracking-tight">Campaigns</span>
+<span class="text-slate-600 font-sans text-sm font-medium tracking-tight">Leads</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest"></div>
+</div>
+</header>
+<div class="flex h-[calc(100vh-3.5rem)]">
+<!-- SideNavBar Mock -->
+<aside class="w-64 glass-sidebar h-full flex flex-col p-4">
+<div class="mb-8 px-4">
+<div class="text-lg font-black text-slate-800">Architect Console</div>
+<div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Enterprise Edition</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-4 py-2 text-blue-700 bg-white/50 border-l-4 border-blue-600 font-sans text-xs uppercase tracking-wider font-semibold">
+<span class="material-symbols-outlined">home</span> Home
+                    </div>
+<div class="flex items-center gap-3 px-4 py-2 text-slate-500 font-sans text-xs uppercase tracking-wider font-semibold">
+<span class="material-symbols-outlined">insights</span> Analytics
+                    </div>
+</div>
+</aside>
+<!-- Main Content Canvas Mock -->
+<main class="flex-1 p-8 space-y-8">
+<div class="grid grid-cols-3 gap-6">
+<div class="h-32 bg-surface-container-lowest border-0 rounded-lg"></div>
+<div class="h-32 bg-surface-container-lowest border-0 rounded-lg"></div>
+<div class="h-32 bg-surface-container-lowest border-0 rounded-lg"></div>
+</div>
+<div class="h-96 bg-surface-container-lowest border-0 rounded-lg"></div>
+</main>
+</div>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-background/30 backdrop-blur-sm">
+<!-- Modal Container -->
+<div class="bg-surface w-full max-w-4xl max-h-[921px] overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<!-- Modal Header: Progress Stepper -->
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative">
+<!-- Progress Line -->
+<div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
+<!-- Step 1: Active -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
+<span class="text-xs font-bold">1</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Data Review</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">2</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Bucketing</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">3</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Creative</span>
+</div>
+<!-- Step 4 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">4</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Launch</span>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="flex-1 overflow-y-auto p-12 bg-surface">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Campaign Summary -->
+<div class="col-span-7 space-y-8">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Campaign Core Summary</h2>
+<p class="text-sm text-on-surface-variant">Review the architectural foundation of your lead generation campaign before proceeding to segmentation.</p>
+</div>
+<div class="space-y-6">
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Campaign Name</label>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Q4 Enterprise Outreach_v2</div>
+</div>
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Source Database</label>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Salesforce_Master_Sync</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Estimated Reach</label>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">42,850 Leads</div>
+</div>
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Data Refresh Rate</label>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Real-time (Webhook)</div>
+</div>
+</div>
+<div class="p-6 bg-surface-container-low rounded-lg space-y-4">
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface">Data Fields Mapped</h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/10 rounded">Email</span>
+<span class="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/10 rounded">Industry</span>
+<span class="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/10 rounded">Job Title</span>
+<span class="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/10 rounded">Company Size</span>
+<span class="px-3 py-1 bg-surface-container-lowest text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/40 border border-outline-variant/20 rounded">Revenue</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Readiness Score (Bento Style Card) -->
+<div class="col-span-5">
+<div class="bg-surface-container-lowest p-8 h-full rounded-xl border border-surface-container-high flex flex-col items-center justify-center text-center shadow-sm">
+<div class="relative w-48 h-48 flex items-center justify-center mb-6">
+<!-- Circular Gauge Background -->
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-low" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary-container" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="99.5" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-5xl font-black text-on-surface tracking-tighter">82%</span>
+<span class="text-[10px] uppercase font-bold tracking-[0.2em] text-on-surface-variant">Readiness</span>
+</div>
+</div>
+<h3 class="text-lg font-bold text-on-surface mb-2">Optimal Integrity</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Your dataset meets the "Architect" threshold for high-conversion targeting. 18% of records contain non-critical missing company metadata.</p>
+<div class="mt-8 w-full space-y-3">
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface-variant">Duplicate Check</span>
+<span class="material-symbols-outlined text-green-600 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="w-full h-1 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-green-500 w-full"></div>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="font-medium text-on-surface-variant">Email Validity</span>
+<span class="material-symbols-outlined text-green-600 text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="w-full h-1 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-green-500 w-[94%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="bg-surface-container px-12 py-6 flex items-center justify-between border-t-0">
+<a href="/" class="px-6 py-2.5 bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-surface-container-highest transition-colors">
+                    Save &amp; Exit
+                </a>
+<div class="flex items-center gap-4">
+<a href="/" class="px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-on-surface-variant/60 hover:text-on-surface transition-colors">
+                        Back
+                    </a>
+<a href="/bucketing" class="px-10 py-3 bg-primary-gradient text-on-primary text-xs font-bold uppercase tracking-widest rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Next
+                    </a>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Images Descriptions (Internal Reference) -->
+<!-- 1. data-alt="high-tech enterprise software dashboard with clean data visualizations and professional blue accent colors" -->
+<!-- 2. data-alt="abstract geometric patterns representing organized data structures with smooth gradients and professional aesthetic" -->
+</body></html>
