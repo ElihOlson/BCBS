@@ -101,6 +101,35 @@ def sanitize_generated_sql(sql_query):
     return fixed_sql
 
 
+def ensure_unique_bucket_names(payload):
+    """
+    Inputs:
+        payload (dict): Parsed bucket payload containing a `buckets` list.
+    Purpose:
+        Enforces unique bucket names for each generation run while preserving
+        the model-provided naming intent.
+    Returns:
+        dict: Updated payload with unique `name` values.
+    """
+    seen = {}
+
+    for bucket in payload.get("buckets", []):
+        base_name = (bucket.get("name") or "").strip()
+        if not base_name:
+            rank_value = str(bucket.get("rank") or "").strip() or "Unknown"
+            base_name = f"Bucket {rank_value}"
+
+        count = seen.get(base_name, 0) + 1
+        seen[base_name] = count
+
+        if count == 1:
+            bucket["name"] = base_name
+        else:
+            bucket["name"] = f"{base_name} ({count})"
+
+    return payload
+
+
 def normalize_generated_bucket_sqls(raw_bucket_json):
     """
     Inputs:
@@ -117,6 +146,8 @@ def normalize_generated_bucket_sqls(raw_bucket_json):
         bucket_sql = bucket.get("sql")
         if isinstance(bucket_sql, str):
             bucket["sql"] = sanitize_generated_sql(bucket_sql)
+
+    payload = ensure_unique_bucket_names(payload)
 
     return json.dumps(payload, ensure_ascii=False, indent=2)
 

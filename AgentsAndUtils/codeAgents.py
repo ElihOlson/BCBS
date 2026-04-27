@@ -277,7 +277,7 @@ Normalization rules:
 
             - `rank` — 1-indexed, ordered by which bucket the analyst should prioritize given the success weights.
 
-            - `name` — short, descriptive, human-readable.
+            - `name` — short, descriptive, human-readable, and unique within this response. The name must clearly reflect the campaign input and the specific bucket logic.
 
             - `sql` — a complete SELECT against `marketing_ai.` qualified tables, returning member-level columns only (member_id, first_name, last_name, email, phone_mobile, plus any feature columns that support the rationale). Must include the universal guards: EXISTS consent_preferences with cp.sms_opt_in = TRUE, not in active sms suppressions, LOWER(members.status) = 'active', active enrollment via EXISTS.
 
