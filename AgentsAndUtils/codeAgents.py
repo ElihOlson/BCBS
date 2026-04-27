@@ -58,9 +58,17 @@ class emailAgent:
         )
         return chat_completion.choices[0].message.content
 
-    def genEmail(self, sqlQuery, campaighnDescription):
-        
-        sysPrompt = (f"you are an agent which generates engagement emails based on a bucket description and a recipients list in the form of an SQL query. Here is the SQL Query: {sqlQuery}. Here is the bucket description: {campaighnDescription}. Reply with a short and porfessional email for this group of people which maximises the campaighn goal.")
+    def genEmail(self, sqlQuery, campaignDescription, campaignRequest):
+        campaign_request_text = json.dumps(campaignRequest, ensure_ascii=False)
+
+        sysPrompt = (
+            "You are an agent which generates engagement emails for a healthcare campaign. "
+            f"Here is the campaign brief: {campaign_request_text}. "
+            f"Here is the SQL query for the recipient segment: {sqlQuery}. "
+            f"Here is the bucket description: {campaignDescription}. "
+            "Write a short professional email for this group of people that aligns with the campaign brief, "
+            "the campaign goal, and the segment rationale."
+        )
 
         result = self.sendMessage("none", sysPrompt)
 
