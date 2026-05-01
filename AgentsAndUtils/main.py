@@ -263,52 +263,50 @@ def export_sql_results(bucket_rows, output_csv_path, supabase_client):
 
     print(f"Wrote SQL execution results to: {output_csv_path}")
 
+if __name__ == "__main__":
+    bktagent = bucketingAgent()
+    sbInteract = supabaseInteractions()
+
+    schema = sbInteract.getSchema()
+
+    campaign_request = bktagent.prompt_for_campaign_request()
+
+    myBuckets = bktagent.generateBuckets("none", schema, campaign_request=campaign_request)
+
+    myBuckets = normalize_generated_bucket_sqls(myBuckets)
+
+    print("OUTPUT: \n\n", myBuckets)
+
+    #write content to csv
+    try:
+        sqlList = []
+        output_file = Path(__file__).resolve().parent / "bucket_output.csv"
+        sql_results_file = Path(__file__).resolve().parent / "SQL_results.csv"
+        response = json_to_csv(myBuckets)
+
+        print("\n\n\n"+response)
+        output_file.write_text(response, encoding="utf-8", newline="")
+
+        # Reuse original flow: pull SQL + rationale pairs into sqlList.
+        bucket_rows = read_bucket_rows(output_file)
+        for bucket in bucket_rows:
+            sqlList.append([bucket["sql"], bucket["rationale"]])
+
+        export_sql_results(bucket_rows, sql_results_file, sbInteract)
+        #print(f"\n\n{rows[:][4]}\n\n")
+
+    except Exception as e:
+        sqlList = []
+        print("Could not parse AI response into CSV")
+        print(f"Error: {e}")
+
+        print(traceback.format_exc())
 
 
-bktagent = bucketingAgent()
-sbInteract = supabaseInteractions()
-
-
-schema = sbInteract.getSchema()
-
-campaign_request = bktagent.prompt_for_campaign_request()
-
-myBuckets = bktagent.generateBuckets("none", schema, campaign_request=campaign_request)
-
-myBuckets = normalize_generated_bucket_sqls(myBuckets)
-
-print("OUTPUT: \n\n", myBuckets)
-
-#write content to csv
-try:
-    sqlList = []
-    output_file = Path(__file__).resolve().parent / "bucket_output.csv"
-    sql_results_file = Path(__file__).resolve().parent / "SQL_results.csv"
-    response = json_to_csv(myBuckets)
-
-    print("\n\n\n"+response)
-    output_file.write_text(response, encoding="utf-8", newline="")
-
-    # Reuse original flow: pull SQL + rationale pairs into sqlList.
-    bucket_rows = read_bucket_rows(output_file)
-    for bucket in bucket_rows:
-        sqlList.append([bucket["sql"], bucket["rationale"]])
-
-    export_sql_results(bucket_rows, sql_results_file, sbInteract)
-    #print(f"\n\n{rows[:][4]}\n\n")
-
-except Exception as e:
-    sqlList = []
-    print("Could not parse AI response into CSV")
-    print(f"Error: {e}")
-
-    print(traceback.format_exc())
-
-
-#query, desc\
-agent = emailAgent()
-for x in sqlList:
-    email = agent.genEmail(x[0], x[1], campaign_request)
-    print(f"EMAILS:\n\n{email}\n")
+    #query, desc\
+    agent = emailAgent()
+    for x in sqlList:
+        email = agent.genEmail(x[0], x[1], campaign_request)
+        print(f"EMAILS:\n\n{email}\n")
 
 

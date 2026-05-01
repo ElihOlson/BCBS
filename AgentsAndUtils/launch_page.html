@@ -129,6 +129,53 @@
     </style>
 </head>
 <body class="bg-background text-on-background min-h-screen flex">
+<script>
+if (typeof window.openModal !== 'function') {
+    window.openModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        const mainContent = document.getElementById('main-content');
+        if (modal && mainContent) {
+            modal.classList.remove('hidden');
+            mainContent.style.filter = 'blur(4px)';
+            mainContent.style.pointerEvents = 'none';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+}
+
+if (typeof window.closeModal !== 'function') {
+    window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        const mainContent = document.getElementById('main-content');
+        if (modal && mainContent) {
+            modal.classList.add('hidden');
+            mainContent.style.filter = 'none';
+            mainContent.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'auto';
+        }
+    };
+}
+
+if (typeof window.startCampaignWizard !== 'function') {
+    window.startCampaignWizard = function() {
+        const about = (document.getElementById('input-about')?.value || '').trim();
+        const campaignFor = (document.getElementById('input-for')?.value || '').trim();
+        const success = (document.getElementById('input-success')?.value || '').trim();
+
+        const reviewName = document.getElementById('review-name');
+        const reviewFor = document.getElementById('review-for');
+        const reviewAbout = document.getElementById('review-about');
+        const reviewSuccess = document.getElementById('review-success');
+
+        if (reviewName) reviewName.textContent = about || '-';
+        if (reviewFor) reviewFor.textContent = campaignFor || '-';
+        if (reviewAbout) reviewAbout.textContent = about || '-';
+        if (reviewSuccess) reviewSuccess.textContent = success || '-';
+
+        window.openModal('data-review-modal');
+    };
+}
+</script>
 <!-- Main Content (will be blurred when modals are open) -->
 <div id="main-content" class="flex-1 flex flex-col min-h-screen">
 <!-- SideNavBar Component -->
@@ -188,7 +235,7 @@
 <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Campaign Dashboard</h2>
 <p class="text-on-surface-variant font-medium mt-1">Manage and monitor your enterprise outreach efforts.</p>
 </div>
-<a href="#" onclick="openModal('data-review-modal')" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
+<a href="#" onclick="startCampaignWizard()" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
 <span class="material-symbols-outlined" data-icon="magic_button">magic_button</span>
 <span>Start Campaign Wizard</span>
 </a>
@@ -204,7 +251,7 @@
 <h3 class="font-bold text-on-surface">About</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Campaign Narrative</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Describe the core message and tone of this campaign..."></textarea>
+<textarea id="input-about" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Describe the core message and tone of this campaign..."></textarea>
 </div>
 <!-- Input Card 2 -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
@@ -215,7 +262,7 @@
 <h3 class="font-bold text-on-surface">For</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Target Audience Segment</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Define the industry, job titles, and firmographics..."></textarea>
+<textarea id="input-for" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Define the industry, job titles, and firmographics..."></textarea>
 </div>
 <!-- Input Card 3 -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
@@ -226,7 +273,7 @@
 <h3 class="font-bold text-on-surface">Success Conditions</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Key Performance Indicators</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
+<textarea id="input-success" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
 </div>
 </div>
 </div>
@@ -295,21 +342,21 @@
 <div class="grid grid-cols-2 gap-6">
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Campaign Name</label>
-<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Q4 Enterprise Outreach_v2</div>
+<div id="review-name" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
 </div>
 <div class="space-y-1">
-<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Source Database</label>
-<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Salesforce_Master_Sync</div>
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Campaign For</label>
+<div id="review-for" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
 </div>
 </div>
 <div class="grid grid-cols-2 gap-6">
 <div class="space-y-1">
-<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Estimated Reach</label>
-<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">42,850 Leads</div>
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">About</label>
+<div id="review-about" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
 </div>
 <div class="space-y-1">
-<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Target Industries</label>
-<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Technology, Healthcare, Finance</div>
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Success Conditions</label>
+<div id="review-success" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
 </div>
 </div>
 </div>
@@ -319,10 +366,10 @@
 <div class="bg-surface-container-low p-6 rounded-lg">
 <h3 class="font-bold text-on-surface mb-4">Quick Actions</h3>
 <div class="space-y-3">
-                <a href="#" onclick="openModal('smart-analyzer-modal'); closeModal('data-review-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
-<span class="font-semibold">Continue to Smart Analyzer</span>
-<span class="material-symbols-outlined">arrow_forward</span>
-</a>
+                <button type="button" id="run-btn" onclick="runCampaign()" class="w-full flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
+<span id="run-btn-label" class="font-semibold">Run Campaign Analysis</span>
+<span id="run-btn-icon" class="material-symbols-outlined">arrow_forward</span>
+</button>
 <a href="#" onclick="closeModal('data-review-modal')" class="flex items-center justify-between p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
 <span>Save & Exit</span>
 <span class="material-symbols-outlined">close</span>
@@ -399,13 +446,7 @@
 <p class="text-green-700 max-w-xs mb-8 text-sm leading-relaxed">
 Our Smart Analyzer has processed your audience data and campaign parameters. The integrity of your dataset meets all enterprise standards for deployment.
 </p>
-<div class="w-full bg-white/70 rounded-lg p-4 flex items-center justify-between border border-green-100">
-<div class="text-left">
-<p class="text-[10px] uppercase tracking-wider font-bold text-green-700 mb-1">Primary Insight</p>
-<p class="text-sm font-semibold text-green-900">Optimal engagement window: 9AM ΓÇô 11AM</p>
-</div>
-<span class="material-symbols-outlined text-green-600 text-xl">insights</span>
-</div>
+
 </div>
 <!-- Red fail state (hidden by default) -->
 <div id="analyzer-fail-box" class="hidden flex-1 flex flex-col items-center justify-center bg-red-50 border-2 border-red-200 rounded-xl p-10 text-center">
@@ -435,44 +476,13 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 <span class="material-symbols-outlined text-primary text-lg">groups</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-extrabold text-on-surface">1.24M</span>
-<span class="text-xs font-bold text-green-600 flex items-center">
-<span class="material-symbols-outlined text-sm">arrow_upward</span> 12%
-</span>
+<span id="analyzer-reach" class="text-2xl font-extrabold text-on-surface">—</span>
 </div>
 <div class="mt-3 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
 <div class="h-full bg-primary rounded-full w-3/4"></div>
 </div>
 </div>
-<!-- Stat Card 2 -->
-<div class="bg-surface-container-low p-5 rounded-lg ring-1 ring-black/[0.03]">
-<div class="flex justify-between items-start mb-2">
-<span class="text-[11px] font-bold text-on-surface-variant uppercase">Confidence Score</span>
-<span class="material-symbols-outlined text-primary text-lg">psychology</span>
-</div>
-<div class="flex items-baseline gap-2">
-<span class="text-2xl font-extrabold text-on-surface">94.8%</span>
-</div>
-<p class="mt-2 text-[11px] text-on-surface-variant leading-tight">High statistical significance based on recent historical performance metrics.</p>
-</div>
-<!-- Stat Card 3 -->
-<div class="bg-surface-container-low p-5 rounded-lg ring-1 ring-black/[0.03]">
-<div class="flex justify-between items-start mb-2">
-<span class="text-[11px] font-bold text-on-surface-variant uppercase">Data Integrity</span>
-<span class="material-symbols-outlined text-primary text-lg">database</span>
-</div>
-<div class="flex items-center gap-3">
-<div class="flex-1">
-<div class="flex justify-between mb-1">
-<span class="text-[10px] text-on-surface-variant">Validation</span>
-<span class="text-[10px] font-bold text-on-surface">99.2%</span>
-</div>
-<div class="h-1 w-full bg-surface-container rounded-full">
-<div class="h-full bg-green-500 rounded-full w-[99%]"></div>
-</div>
-</div>
-</div>
-</div>
+
 <!-- Quick Actions -->
 <div class="bg-surface-container-low p-5 rounded-lg space-y-3">
 <a href="#" onclick="openModal('bucketing-modal'); closeModal('smart-analyzer-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
@@ -548,53 +558,9 @@ Based on your campaign objectives, our engine has identified three high-probabil
 </p>
 </div>
 <!-- Audience Segments -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-<!-- Segment Card 1 -->
-<div class="relative group p-6 rounded-lg bg-surface-container-lowest border-2 border-primary shadow-sm flex flex-col justify-between h-48 cursor-pointer transition-all">
-<div class="absolute top-4 right-4">
-<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-on-primary text-[14px]" data-weight="fill">check</span>
-</div>
-</div>
-<div>
-<div class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">High Propensity</div>
-<h4 class="text-lg font-bold text-on-surface leading-tight">High-Value Churn Risk</h4>
-<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Users with &gt;$500 LTV showing decreased login frequency.</p>
-</div>
-<div class="flex items-center gap-4 mt-4">
-<div class="flex flex-col">
-<span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
-<span class="text-sm font-bold">12,402</span>
-</div>
-<div class="h-6 w-[1px] bg-outline-variant/30"></div>
-<div class="flex flex-col">
-<span class="text-[10px] text-on-surface-variant uppercase font-medium">Est. ROI</span>
-<span class="text-sm font-bold text-primary">+24%</span>
-</div>
-</div>
-</div>
-<!-- Segment Card 2 -->
-<div class="relative group p-6 rounded-lg bg-surface-container-low border border-transparent hover:border-outline-variant/40 shadow-none flex flex-col justify-between h-48 cursor-pointer transition-all">
-<div class="absolute top-4 right-4">
-<div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center"></div>
-</div>
-<div>
-<div class="text-[10px] font-bold text-on-surface-variant opacity-60 uppercase tracking-widest mb-1">Emerging Trend</div>
-<h4 class="text-lg font-bold text-on-surface leading-tight">Early Adopter Pulse</h4>
-<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Beta feature testers who haven't upgraded yet.</p>
-</div>
-<div class="flex items-center gap-4 mt-4">
-<div class="flex flex-col">
-<span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
-<span class="text-sm font-bold">4,891</span>
-</div>
-<div class="h-6 w-[1px] bg-outline-variant/30"></div>
-<div class="flex flex-col">
-<span class="text-[10px] text-on-surface-variant uppercase font-medium">Est. ROI</span>
-<span class="text-sm font-bold text-on-surface-variant">+12%</span>
-</div>
-</div>
-</div>
+<!-- Audience Segments (populated by JS) -->
+<div id="bucket-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+<p class="col-span-2 text-on-surface-variant text-sm text-center py-8">Run the analysis to see segments.</p>
 </div>
 <!-- Navigation -->
 <div class="flex justify-between items-center pt-6 border-t border-outline-variant/10">
@@ -619,38 +585,32 @@ Continue to Creative
 <!-- Modal Header -->
 <div class="bg-surface-container-low px-12 py-8 border-b-0">
 <div class="flex justify-between items-center relative wizard-stepper">
-<!-- Progress Line -->
 <div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
 <div class="absolute top-4 left-0 w-3/4 h-[2px] bg-primary z-0"></div>
-<!-- Step 1: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-sm">check</span>
 </div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
 </div>
-<!-- Step 2: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-sm">check</span>
 </div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Analyzer</span>
 </div>
-<!-- Step 3: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-sm">check</span>
 </div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Bucketing</span>
 </div>
-<!-- Step 4: Active -->
 <div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
 <span class="text-xs font-bold">4</span>
 </div>
 <span class="text-xs font-bold uppercase tracking-widest text-primary">Creative</span>
 </div>
-<!-- Step 5 -->
 <div class="relative z-10 flex flex-col items-center gap-3">
 <div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
 <span class="text-xs font-bold">5</span>
@@ -659,69 +619,20 @@ Continue to Creative
 </div>
 </div>
 </div>
-<!-- Modal Content -->
 <div class="flex-1 overflow-y-auto p-12 bg-surface">
-<div class="grid grid-cols-12 gap-8">
-<!-- Left: Email Composer -->
-<div class="col-span-7 space-y-8">
-<div>
-<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Email Creative</h2>
-<p class="text-sm text-on-surface-variant">Craft your campaign message with AI assistance.</p>
+<div class="mb-6">
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-1">Email Creative</h2>
+<p class="text-sm text-on-surface-variant">One email generated per selected segment.</p>
 </div>
-<div class="space-y-6">
-<div>
-<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Subject Line</label>
-<input type="text" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm" placeholder="Enter compelling subject line..." value="Unlock Enterprise Growth: Your Q4 Strategy Awaits">
+<div id="email-tabs" class="flex gap-2 flex-wrap mb-6"></div>
+<div id="email-content-area" class="space-y-4">
+<p class="text-on-surface-variant text-sm">Run the analysis and select segments to view emails.</p>
 </div>
-<div>
-<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Email Body</label>
-<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[200px]" placeholder="Write your email content...">Dear [First Name],
-
-As we approach Q4, we're excited to share breakthrough insights that have helped enterprise teams like yours accelerate growth by 40%.
-
-Our latest platform updates include:
-ΓÇó Advanced analytics dashboard
-ΓÇó Automated workflow optimization
-ΓÇó Enhanced security protocols
-
-Ready to transform your operations?
-
-[CTA Button: Schedule Demo]
-
-Best regards,
-The Campaign Architect Team</textarea>
-</div>
-</div>
-</div>
-<!-- Right: Preview & Actions -->
-<div class="col-span-5 space-y-6">
-<div class="bg-surface-container-low p-6 rounded-lg">
-<h3 class="font-bold text-on-surface mb-4">Email Preview</h3>
-<div class="bg-white p-4 rounded border text-xs">
-<div class="font-bold mb-2">Subject: Unlock Enterprise Growth: Your Q4 Strategy Awaits</div>
-<div class="text-gray-600 leading-relaxed">
-Dear [First Name],<br><br>
-As we approach Q4, we're excited to share breakthrough insights...<br><br>
-[CTA Button: Schedule Demo]<br><br>
-Best regards,<br>
-The Campaign Architect Team
-</div>
-</div>
-</div>
-<div class="bg-surface-container-low p-6 rounded-lg">
-<h3 class="font-bold text-on-surface mb-4">Quick Actions</h3>
-<div class="space-y-3">
-<a href="#" onclick="openModal('launch-modal'); closeModal('email-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
-<span class="font-semibold">Continue to Launch</span>
+<div class="flex justify-end mt-8">
+<a href="#" onclick="openModal('launch-modal'); closeModal('email-modal')" class="flex items-center gap-2 bg-primary text-on-primary px-8 py-2.5 rounded font-bold text-sm shadow-md hover:shadow-lg transition-all">
+Continue to Launch
 <span class="material-symbols-outlined">arrow_forward</span>
 </a>
-<a href="#" onclick="closeModal('email-modal')" class="flex items-center justify-between p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
-<span>Save Draft</span>
-<span class="material-symbols-outlined">save</span>
-</a>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="px-12 py-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-start items-center">
@@ -736,52 +647,33 @@ Back to Bucketing
 <!-- Launch Modal -->
 <div id="launch-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
 <div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
-<!-- Modal Header -->
 <div class="bg-surface-container-low px-12 py-8 border-b-0">
 <div class="flex justify-between items-center relative wizard-stepper">
-<!-- Progress Line -->
 <div class="absolute top-4 left-0 w-full h-[2px] bg-primary z-0"></div>
-<!-- Step 1: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-sm">check</span>
-</div>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
 </div>
-<!-- Step 2: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-sm">check</span>
-</div>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Analyzer</span>
 </div>
-<!-- Step 3: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-sm">check</span>
-</div>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Bucketing</span>
 </div>
-<!-- Step 4: Complete -->
 <div class="relative z-10 flex flex-col items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-sm">check</span>
-</div>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center"><span class="material-symbols-outlined text-sm">check</span></div>
 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Creative</span>
 </div>
-<!-- Step 5: Active -->
 <div class="relative z-10 flex flex-col items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
-<span class="text-xs font-bold">5</span>
-</div>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]"><span class="text-xs font-bold">5</span></div>
 <span class="text-xs font-bold uppercase tracking-widest text-primary">Launch</span>
 </div>
 </div>
 </div>
-<!-- Modal Content -->
 <div class="flex-1 overflow-y-auto p-12 bg-surface">
 <div class="grid grid-cols-12 gap-8">
-<!-- Left: Launch Summary -->
 <div class="col-span-7 space-y-8">
 <div>
 <h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Campaign Launch Summary</h2>
@@ -790,55 +682,26 @@ Back to Bucketing
 <div class="space-y-6">
 <div class="bg-surface-container-low p-6 rounded-lg">
 <h3 class="font-bold text-on-surface mb-4">Campaign Details</h3>
-<div class="grid grid-cols-2 gap-4 text-sm">
-<div><span class="text-on-surface-variant">Name:</span> Q4 Enterprise Outreach_v2</div>
-<div><span class="text-on-surface-variant">Segments:</span> 2 Selected</div>
-<div><span class="text-on-surface-variant">Total Reach:</span> 17,293 Leads</div>
+<div id="launch-details" class="grid grid-cols-2 gap-4 text-sm">
+<div><span class="text-on-surface-variant">Name:</span> <span id="launch-name">-</span></div>
+<div><span class="text-on-surface-variant">Segments:</span> <span id="launch-bucket-count">-</span></div>
+<div><span class="text-on-surface-variant">Total Reach:</span> <span id="launch-reach">-</span></div>
 <div><span class="text-on-surface-variant">Est. Send Time:</span> Immediate</div>
 </div>
 </div>
-<div class="bg-surface-container-low p-6 rounded-lg">
-<h3 class="font-bold text-on-surface mb-4">Quality Checks</h3>
-<div class="space-y-3">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-green-600">check_circle</span>
-<span class="text-sm">Content reviewed and approved</span>
-</div>
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-green-600">check_circle</span>
-<span class="text-sm">Audience segments validated</span>
-</div>
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-green-600">check_circle</span>
-<span class="text-sm">Compliance requirements met</span>
 </div>
 </div>
-</div>
-</div>
-</div>
-<!-- Right: Launch Actions -->
 <div class="col-span-5 space-y-6">
 <div class="bg-surface-container-low p-6 rounded-lg">
 <h3 class="font-bold text-on-surface mb-4">Launch Campaign</h3>
 <p class="text-sm text-on-surface-variant mb-6">Your campaign is ready to launch. This action cannot be undone.</p>
 <div class="space-y-3">
-<button onclick="launchCampaign(); closeModal('launch-modal')" class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors font-semibold">
+<button id="launch-btn" onclick="launchCampaign()" class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors font-semibold">
 <span class="material-symbols-outlined">rocket_launch</span>
 Launch Campaign Now
 </button>
-<a href="#" onclick="closeModal('launch-modal')" class="flex items-center justify-center gap-2 p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
-<span class="material-symbols-outlined">schedule</span>
-Schedule for Later
-</a>
+
 </div>
-</div>
-<div class="bg-surface-container-low p-6 rounded-lg">
-<h3 class="font-bold text-on-surface mb-4">Need Help?</h3>
-<p class="text-sm text-on-surface-variant">Contact our campaign specialists for assistance.</p>
-<a href="#" onclick="openModal('feedback-modal'); closeModal('launch-modal')" class="flex items-center gap-2 mt-4 text-primary hover:text-primary-container transition-colors">
-<span class="material-symbols-outlined">contact_support</span>
-Get Support
-</a>
 </div>
 </div>
 </div>
@@ -903,29 +766,50 @@ Back to Creative
 </div>
 </div>
 
-<!-- JavaScript for Modal Functionality -->
+<!-- JavaScript -->
 <script>
+// ─── State ────────────────────────────────────────────────
+let campaignData = null;          // full API response
+let selectedBuckets = new Set();  // ids of selected buckets
+
+function getCampaignInputs() {
+    const about = (document.getElementById('input-about')?.value || '').trim();
+    const campaignFor = (document.getElementById('input-for')?.value || '').trim();
+    const success = (document.getElementById('input-success')?.value || '').trim();
+    return { about, campaignFor, success };
+}
+
+function startCampaignWizard() {
+    const { about, campaignFor, success } = getCampaignInputs();
+
+    const reviewName = document.getElementById('review-name');
+    const reviewFor = document.getElementById('review-for');
+    const reviewAbout = document.getElementById('review-about');
+    const reviewSuccess = document.getElementById('review-success');
+
+    if (reviewName) reviewName.textContent = about || '-';
+    if (reviewFor) reviewFor.textContent = campaignFor || '-';
+    if (reviewAbout) reviewAbout.textContent = about || '-';
+    if (reviewSuccess) reviewSuccess.textContent = success || '-';
+
+    openModal('data-review-modal');
+}
+
+// ─── Modal helpers ────────────────────────────────────────
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     const mainContent = document.getElementById('main-content');
-    
     if (modal && mainContent) {
         modal.classList.remove('hidden');
         mainContent.style.filter = 'blur(4px)';
         mainContent.style.pointerEvents = 'none';
         document.body.style.overflow = 'hidden';
-        
-        // Animate in
-        setTimeout(() => {
-            modal.querySelector('.modal-enter')?.classList.add('modal-enter-active');
-        }, 10);
     }
 }
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     const mainContent = document.getElementById('main-content');
-    
     if (modal && mainContent) {
         modal.classList.add('hidden');
         mainContent.style.filter = 'none';
@@ -934,27 +818,229 @@ function closeModal(modalId) {
     }
 }
 
-function launchCampaign() {
-    alert('Campaign launched successfully!');
-    // Here you could add actual launch logic
+// ─── Step 1 → opens data-review (summary) modal ───────────
+// The "Start Campaign Wizard" button already calls openModal('data-review-modal')
+
+// ─── Step 2: Run Campaign Analysis ────────────────────────
+async function runCampaign() {
+    const { about, campaignFor, success } = getCampaignInputs();
+
+    if (!about || !campaignFor || !success) {
+        alert('Please fill in all three fields before running the analysis.');
+        return;
+    }
+
+    // Show loading state
+    const btn = document.getElementById('run-btn');
+    const btnLabel = document.getElementById('run-btn-label');
+    const btnIcon = document.getElementById('run-btn-icon');
+    if (btn) btn.style.pointerEvents = 'none';
+    if (btnLabel) btnLabel.textContent = 'Analyzing… this may take a minute';
+    if (btnIcon) btnIcon.textContent = 'hourglass_empty';
+
+    try {
+        const res = await fetch('/api/campaign/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ about, campaign_for: campaignFor, success_conditions: success }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Server error');
+
+        campaignData = data;
+        selectedBuckets = new Set(data.buckets.map(b => b.id));  // select all by default
+
+        populateAnalyzer(data.analyzer);
+        populateBuckets(data.buckets);
+        populateEmails(data.buckets);
+        populateLaunch(data.launch);
+
+        closeModal('data-review-modal');
+        openModal('smart-analyzer-modal');
+    } catch (err) {
+        alert('Error running analysis: ' + err.message);
+    } finally {
+        if (btn) btn.style.pointerEvents = '';
+        if (btnLabel) btnLabel.textContent = 'Run Campaign Analysis';
+        if (btnIcon) btnIcon.textContent = 'arrow_forward';
+    }
 }
 
-// Close modal when clicking backdrop
+// ─── Populate: Analyzer ───────────────────────────────────
+function populateAnalyzer(analyzer) {
+    const reach = document.getElementById('analyzer-reach');
+    if (reach) reach.textContent = analyzer.predicted_reach?.toLocaleString() ?? '—';
+}
+
+// ─── Populate: Buckets ────────────────────────────────────
+function populateBuckets(buckets) {
+    const container = document.getElementById('bucket-cards-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!buckets || buckets.length === 0) {
+        container.innerHTML = '<p class="col-span-2 text-on-surface-variant text-sm text-center py-8">No segments were generated.</p>';
+        return;
+    }
+    buckets.forEach(bucket => {
+        const isSelected = selectedBuckets.has(bucket.id);
+        const card = document.createElement('div');
+        card.id = 'bucket-card-' + bucket.id;
+        card.className = 'relative group p-6 rounded-lg flex flex-col justify-between cursor-pointer transition-all ' +
+            (isSelected
+                ? 'bg-surface-container-lowest border-2 border-primary shadow-sm'
+                : 'bg-surface-container-low border border-transparent hover:border-outline-variant/40');
+        card.innerHTML = `
+            <div class="absolute top-4 right-4">
+                <div class="w-5 h-5 rounded-full ${isSelected ? 'bg-primary' : 'border-2 border-outline-variant'} flex items-center justify-center" id="bucket-check-${bucket.id}">
+                    ${isSelected ? '<span class="material-symbols-outlined text-on-primary text-[14px]">check</span>' : ''}
+                </div>
+            </div>
+            <div>
+                <div class="text-[10px] font-bold ${isSelected ? 'text-primary' : 'text-on-surface-variant opacity-60'} uppercase tracking-widest mb-1">Rank ${bucket.rank}</div>
+                <h4 class="text-lg font-bold text-on-surface leading-tight pr-6">${bucket.name}</h4>
+                <p class="text-xs text-on-surface-variant mt-2 leading-relaxed">${bucket.rationale}</p>
+            </div>
+            <div class="flex items-center gap-4 mt-4">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
+                    <span class="text-sm font-bold">${bucket.row_count?.toLocaleString() ?? '—'}</span>
+                </div>
+                <div class="h-6 w-[1px] bg-outline-variant/30"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-on-surface-variant uppercase font-medium">Treatment</span>
+                    <span class="text-sm font-bold text-on-surface-variant">${bucket.suggested_treatment || '—'}</span>
+                </div>
+            </div>`;
+        card.addEventListener('click', () => toggleBucket(bucket.id));
+        container.appendChild(card);
+    });
+}
+
+function toggleBucket(id) {
+    if (selectedBuckets.has(id)) {
+        selectedBuckets.delete(id);
+    } else {
+        selectedBuckets.add(id);
+    }
+    // Refresh bucket cards
+    if (campaignData) populateBuckets(campaignData.buckets);
+    // Refresh email tabs to reflect new selection
+    if (campaignData) populateEmails(campaignData.buckets);
+    // Refresh launch summary
+    if (campaignData) populateLaunch(campaignData.launch);
+}
+
+// ─── Populate: Emails ─────────────────────────────────────
+function populateEmails(buckets) {
+    const tabsEl = document.getElementById('email-tabs');
+    const contentEl = document.getElementById('email-content-area');
+    if (!tabsEl || !contentEl) return;
+
+    const selected = buckets.filter(b => selectedBuckets.has(b.id));
+    tabsEl.innerHTML = '';
+    contentEl.innerHTML = '';
+
+    if (selected.length === 0) {
+        contentEl.innerHTML = '<p class="text-on-surface-variant text-sm">No segments selected. Go back and select at least one.</p>';
+        return;
+    }
+
+    selected.forEach((bucket, i) => {
+        // Tab button
+        const tab = document.createElement('button');
+        tab.textContent = bucket.name;
+        tab.className = 'px-4 py-2 rounded text-sm font-semibold transition-colors ' +
+            (i === 0 ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high');
+        tab.onclick = () => showEmailTab(selected, bucket.id);
+        tab.id = 'email-tab-' + bucket.id;
+        tabsEl.appendChild(tab);
+
+        // Content panel
+        const panel = document.createElement('div');
+        panel.id = 'email-panel-' + bucket.id;
+        panel.className = i === 0 ? '' : 'hidden';
+        panel.innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Segment</label>
+                    <p class="text-sm font-semibold text-on-surface">${bucket.name} — ${bucket.row_count?.toLocaleString() ?? '?'} recipients</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Email Body</label>
+                    <textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[260px]">${bucket.email_body || ''}</textarea>
+                </div>
+            </div>`;
+        contentEl.appendChild(panel);
+    });
+}
+
+function showEmailTab(selected, activeId) {
+    selected.forEach(b => {
+        const tab = document.getElementById('email-tab-' + b.id);
+        const panel = document.getElementById('email-panel-' + b.id);
+        const isActive = b.id === activeId;
+        if (tab) tab.className = 'px-4 py-2 rounded text-sm font-semibold transition-colors ' +
+            (isActive ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high');
+        if (panel) panel.className = isActive ? '' : 'hidden';
+    });
+}
+
+// ─── Populate: Launch Summary ─────────────────────────────
+function populateLaunch(launch) {
+    const nameEl = document.getElementById('launch-name');
+    const countEl = document.getElementById('launch-bucket-count');
+    const reachEl = document.getElementById('launch-reach');
+    if (nameEl) nameEl.textContent = launch?.campaign_name || '—';
+    if (countEl) countEl.textContent = selectedBuckets.size + ' Selected';
+    if (reachEl) {
+        // Sum only selected bucket reaches
+        const reach = campaignData?.buckets
+            .filter(b => selectedBuckets.has(b.id))
+            .reduce((sum, b) => sum + (b.row_count || 0), 0) ?? 0;
+        reachEl.textContent = reach.toLocaleString() + ' members';
+    }
+}
+
+// ─── Launch Campaign ──────────────────────────────────────
+async function launchCampaign() {
+    const btn = document.getElementById('launch-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+
+    const launch = campaignData?.launch || {};
+    const selected = campaignData?.buckets?.filter(b => selectedBuckets.has(b.id)) || [];
+    const reach = selected.reduce((s, b) => s + (b.row_count || 0), 0);
+
+    try {
+        const res = await fetch('/api/campaign/launch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                campaign_name: launch.campaign_name || 'Campaign',
+                total_reach: reach,
+                selected_bucket_count: selected.length,
+            }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Launch failed');
+        closeModal('launch-modal');
+        alert(`Campaign launched on ${data.launch_date}!`);
+    } catch (err) {
+        alert('Launch error: ' + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined">rocket_launch</span> Launch Campaign Now'; }
+    }
+}
+
+// ─── Backdrop / Escape close ──────────────────────────────
 document.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal-backdrop')) {
-        const modal = event.target;
-        const modalId = modal.id;
-        closeModal(modalId);
+        closeModal(event.target.id);
     }
 });
 
-// Close modal on Escape key
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
-        const openModals = document.querySelectorAll('.modal-backdrop:not(.hidden)');
-        openModals.forEach(modal => {
-            closeModal(modal.id);
-        });
+        document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id));
     }
 });
 </script>
