@@ -3,6 +3,13 @@
     "campaign_name": "This campaign is designed to improve medication adherence am",
     "status": "Launched",
     "launch_date": "May 01, 2026",
+    "total_reach": 771,
+    "selected_bucket_count": 4
+  },
+  {
+    "campaign_name": "This campaign is designed to improve medication adherence am",
+    "status": "Launched",
+    "launch_date": "May 01, 2026",
     "total_reach": 1082,
     "selected_bucket_count": 7
   },
