@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Campaign Architect - Campaign Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#fffcff",
+              "on-primary": "#ffffff",
+              "inverse-primary": "#a4c9ff",
+              "error-container": "#ffdad6",
+              "secondary-fixed": "#e3e2e2",
+              "primary-fixed-dim": "#a4c9ff",
+              "outline-variant": "#c0c7d4",
+              "on-secondary-container": "#646464",
+              "secondary-fixed-dim": "#c7c6c6",
+              "surface-container": "#eeeeed",
+              "on-surface-variant": "#414752",
+              "surface-container-high": "#e8e8e7",
+              "background": "#f9f9f8",
+              "surface": "#f9f9f8",
+              "tertiary-container": "#bc5800",
+              "on-primary-fixed-variant": "#004884",
+              "on-primary-fixed": "#001c39",
+              "inverse-surface": "#2f3130",
+              "primary-fixed": "#d4e3ff",
+              "on-primary-container": "#fefcff",
+              "surface-bright": "#f9f9f8",
+              "error": "#ba1a1a",
+              "on-secondary-fixed-variant": "#464747",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f4f4f3",
+              "on-tertiary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "on-secondary-fixed": "#1b1c1c",
+              "secondary": "#5e5e5e",
+              "tertiary-fixed-dim": "#ffb68b",
+              "surface-tint": "#005fac",
+              "surface-dim": "#dadad9",
+              "on-tertiary-fixed": "#321200",
+              "tertiary": "#964500",
+              "tertiary-fixed": "#ffdbc8",
+              "on-error": "#ffffff",
+              "surface-variant": "#e2e2e1",
+              "primary": "#005da9",
+              "surface-container-highest": "#e2e2e1",
+              "outline": "#717784",
+              "on-surface": "#1a1c1c",
+              "inverse-on-surface": "#f1f1f0",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#e3e2e2",
+              "on-tertiary-fixed-variant": "#753400",
+              "on-secondary": "#ffffff",
+              "primary-container": "#0176d3"
+            },
+            fontFamily: {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #005da9 0%, #0176d3 100%);
+        }
+        .glass-sidebar {
+            backdrop-filter: blur(20px);
+        }
+        /* Custom scrollbar for enterprise feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c0c7d4; border-radius: 10px; }
+        /* Modal styles */
+        .modal-backdrop {
+            backdrop-filter: blur(8px) saturate(1.2);
+            background: rgba(26, 28, 28, 0.4);
+        }
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.15s ease-in; }
+        .wizard-stepper {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.5rem;
+            align-items: start;
+        }
+        .wizard-stepper > .absolute.z-0 {
+            top: 1.25rem;
+        }
+        .wizard-stepper > .relative.z-10.flex.flex-col.items-center.gap-3 {
+            width: 100%;
+            min-height: 6.25rem;
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+            cursor: pointer;
+        }
+        .wizard-stepper > .relative.z-10.flex.flex-col.items-center.gap-3 > div:first-child {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        .wizard-stepper > .relative.z-10.flex.flex-col.items-center.gap-3 > span:last-child {
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            line-height: 1.1;
+        }
+        .wizard-modal-window {
+            height: 90vh;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex">
+<!-- Main Content (will be blurred when modals are open) -->
+<div id="main-content" class="flex-1 flex flex-col min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 flex flex-col h-full z-40 bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-xl h-screen w-64 left-0 border-r-0">
+<div class="px-6 py-8">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 bg-primary-gradient rounded flex items-center justify-center text-white font-black text-lg">
+                    CA
+                </div>
+<div>
+<h1 class="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">Campaign Architect</h1>
+<p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant opacity-60">Enterprise Edition</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('campaigns-modal')">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-slate-800/50 border-l-4 border-blue-600 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('campaigns-modal')">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span>Campaigns</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('tasks-modal')">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+<span>Tasks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('files-modal')">
+<span class="material-symbols-outlined" data-icon="folder">folder</span>
+<span>Files</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('setup-modal')">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Setup</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 border-t border-outline-variant/10">
+<button class="w-full py-3 bg-primary-gradient text-white rounded-lg font-bold text-sm shadow-md active:opacity-80 transition-all" onclick="openModal('data-review-modal')">
+                New Record
+            </button>
+<div class="mt-6 flex items-center gap-3 px-4 py-2 text-slate-500 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold cursor-pointer" onclick="openModal('feedback-modal')">
+<span class="material-symbols-outlined" data-icon="comment">comment</span>
+<span>Feedback</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopNavBar Component -->
+<header class="flex items-center justify-between px-6 h-14 w-full bg-slate-50 dark:bg-slate-900 border-b-0 shadow-sm dark:shadow-none sticky top-0 z-30">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4">
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 font-sans text-sm font-medium tracking-tight hover:bg-slate-200/50 transition-colors px-2 py-1 rounded" href="#">Dashboard</a>
+<a class="text-blue-700 dark:text-blue-300 border-b-2 border-blue-600 pb-1 font-sans text-sm font-medium tracking-tight transition-colors" href="#" onclick="openModal('campaigns-modal')">Campaigns</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+<a href="#" onclick="openModal('data-review-modal')" class="px-4 py-1.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-container transition-colors inline-block">
+                    Create Campaign
+                </a>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/20">
+<img alt="User Profile" data-alt="professional headshot of a smiling executive man in a tailored dark blue suit against a clean grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7bYk5VYugAANj2gipfn4GWiAoMasaT4Du5aIQy76Od0EowUHv5lNQCtCNsOKamgJqlrnzFiVDRPPvgJ-hUaAPkSVsSEe1XRS5rZ3-qjYlXfQ6rj8TabCrjPcOtj3FsGQ_htN7PIIdTKQa6vFFDX3n1MzDL_uZ0Psd8Wo7mtQ_LDWbPOCJmcuuY3Rn6DzhkIEv2hsR9Fo-Suj7TKppv3doc-LVPAzrDISX-i4UmErZKzy3610-ayLaacfVlx3ciwcgxK2EnhKBPDA"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="p-8 space-y-8 flex-1">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Campaign Dashboard</h2>
+<p class="text-on-surface-variant font-medium mt-1">Manage and monitor your enterprise outreach efforts.</p>
+</div>
+<a href="#" id="start-campaign-wizard-btn" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="magic_button">magic_button</span>
+<span>Start Campaign Wizard</span>
+</a>
+</div>
+<!-- Bento Grid - Campaign Inputs -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Input Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+</div>
+<h3 class="font-bold text-on-surface">About</h3>
+</div>
+<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Campaign Narrative</label>
+<textarea id="campaign-about-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Describe the core message and tone of this campaign..."></textarea>
+</div>
+<!-- Input Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</div>
+<h3 class="font-bold text-on-surface">For</h3>
+</div>
+<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Target Audience Segment</label>
+<textarea id="campaign-for-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Define the industry, job titles, and firmographics..."></textarea>
+</div>
+<!-- Input Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-error/10 text-error flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+</div>
+<h3 class="font-bold text-on-surface">Success Conditions</h3>
+</div>
+<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Key Performance Indicators</label>
+<textarea id="campaign-success-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
+</div>
+</div>
+<!-- Previous Campaigns Table -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm overflow-hidden">
+<div class="px-6 py-5 flex items-center justify-between border-b border-outline-variant/5">
+<h3 class="font-bold text-lg text-on-surface">Previous Campaigns</h3>
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-0 rounded-lg text-xs w-64 focus:ring-1 focus:ring-primary" placeholder="Filter campaigns..." type="text"/>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high">
+<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Name</th>
+<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Status</th>
+<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Launch Date</th>
+<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Metrics</th>
+<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody id="previous-campaigns-body" class="divide-y divide-outline-variant/10">
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-surface-container-low/30 border-t border-outline-variant/5 flex justify-between items-center">
+<p id="previous-campaigns-summary" class="text-xs text-on-surface-variant font-medium">Showing 0 campaigns</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container-lowest border border-outline-variant/20 rounded text-xs font-bold hover:bg-surface-container transition-colors disabled:opacity-50">Previous</button>
+<button class="px-3 py-1 bg-surface-container-lowest border border-outline-variant/20 rounded text-xs font-bold hover:bg-surface-container transition-colors">Next</button>
+</div>
+</div>
+</section>
+<!-- Bottom Illustration/Insight Card (Asymmetric Layout) -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+<div class="lg:col-span-3 bg-primary-gradient p-8 rounded-xl text-white relative overflow-hidden flex flex-col justify-center">
+<div class="relative z-10">
+<h4 class="text-2xl font-black mb-2">Architect Tip</h4>
+<p class="text-blue-100 max-w-md">Companies with documented "Success Conditions" see a 24% higher retention rate. Have you verified yours for the new cycle?</p>
+<button class="mt-6 px-5 py-2 bg-white text-primary rounded font-bold text-sm hover:bg-blue-50 transition-colors">View Best Practices</button>
+</div>
+<div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute right-8 top-1/2 -translate-y-1/2 opacity-20">
+<span class="material-symbols-outlined !text-[120px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</div>
+<div class="lg:col-span-2 bg-surface-container-high rounded-xl overflow-hidden min-h-[200px]">
+<img alt="Data Analytics Visualization" class="w-full h-full object-cover grayscale mix-blend-multiply opacity-60" data-alt="clean dashboard screen showing complex line graphs and bar charts in a professional analytics interface with soft light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6BuFt1cDp_B9xAqV_hysdGb3K5u5gzdmAyFdQQbECBbaoAI8WiRdl1-GX2_i-35YTw5SVrdgM1mLhhGdoim9rRrQyE4WHECeCAL1TsiITkr-FYDwksrlSBhdVA2-0smMtXi77w31JdPccKNQCpally5lYhnrCouYEQaa-d6uhxmm62yKvTfFNzE9qFIjKTwcZxkpQR93d7Q7aNj5zMFDDQpVg453SZoEdmDK2_3UtA4VTAkhEfp7c8D10udaWaoblRDH4eup2Izc"/>
+</div>
+</div>
+    </div>
+</div>
+</div>
+</main>
+</div>
+
+<!-- Modal Overlays -->
+<!-- Data Review Modal -->
+<div id="data-review-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<!-- Modal Header: Progress Stepper -->
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative wizard-stepper">
+<!-- Progress Line -->
+<div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
+<!-- Step 1: Active -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
+<span class="text-xs font-bold">1</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Data Review</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">2</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Analyzer</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">3</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Bucketing</span>
+</div>
+<!-- Step 4 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">4</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Creative</span>
+</div>
+<!-- Step 5 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">5</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Launch</span>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="flex-1 overflow-y-auto p-12 bg-surface">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Campaign Summary -->
+<div class="col-span-7 space-y-8">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Campaign Core Summary</h2>
+<p class="text-sm text-on-surface-variant">Review the architectural foundation of your lead generation campaign before proceeding to segmentation.</p>
+</div>
+<div class="space-y-6">
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Campaign Name</label>
+<div id="dr-campaign-name" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+</div>
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Source Database</label>
+<div id="dr-source-db" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Estimated Reach</label>
+<div id="dr-estimated-reach" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+</div>
+<div class="space-y-1">
+<label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Target Industries</label>
+<div id="dr-target-summary" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Quick Actions -->
+<div class="col-span-5 space-y-6">
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Quick Actions</h3>
+<div class="space-y-3">
+                <a href="#" onclick="openModal('smart-analyzer-modal'); closeModal('data-review-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
+<span class="font-semibold">Continue to Smart Analyzer</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</a>
+<a href="#" onclick="closeModal('data-review-modal')" class="flex items-center justify-between p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
+<span>Save & Exit</span>
+<span class="material-symbols-outlined">close</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Smart Analyzer Modal -->
+<div id="smart-analyzer-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<!-- Modal Header: Progress Stepper -->
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative wizard-stepper">
+<!-- Progress Line -->
+<div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
+<div class="absolute top-4 left-0 h-[2px] bg-primary z-0" style="width: calc(30% + 8px);"></div>
+<!-- Step 1: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
+</div>
+<!-- Step 2: Active -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
+<span class="text-xs font-bold">2</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Analyzer</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">3</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Bucketing</span>
+</div>
+<!-- Step 4 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">4</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Creative</span>
+</div>
+<!-- Step 5 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">5</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Launch</span>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="flex-1 overflow-y-auto p-12 bg-surface">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Analysis Status Box -->
+<div class="col-span-7 flex flex-col">
+<div class="mb-6">
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Smart Analyzer</h2>
+<p class="text-sm text-on-surface-variant">Our AI engine has analyzed your campaign parameters and audience data.</p>
+</div>
+<!-- Status Box: Green (pass) state. Swap bg/text/icon classes for red (fail) state -->
+<div id="analyzer-status-box" class="flex-1 flex flex-col items-center justify-center bg-green-50 border-2 border-green-200 rounded-xl p-10 text-center">
+<div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-green-600 text-5xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 id="analyzer-status-title" class="text-xl font-bold text-green-800 mb-2">Analysis Complete</h3>
+<p class="text-green-700 max-w-xs mb-8 text-sm leading-relaxed">
+<span id="analyzer-message">Our Smart Analyzer has processed your campaign parameters and audience data.</span>
+</p>
+<div class="w-full bg-white/70 rounded-lg p-4 flex items-center justify-between border border-green-100">
+<div class="text-left">
+<p class="text-[10px] uppercase tracking-wider font-bold text-green-700 mb-1">Primary Insight</p>
+<p id="analyzer-primary-insight" class="text-sm font-semibold text-green-900">Optimal engagement window: 9AM - 11AM</p>
+</div>
+<span class="material-symbols-outlined text-green-600 text-xl">insights</span>
+</div>
+</div>
+<!-- Red fail state (hidden by default) -->
+<div id="analyzer-fail-box" class="hidden flex-1 flex flex-col items-center justify-center bg-red-50 border-2 border-red-200 rounded-xl p-10 text-center">
+<div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-red-600 text-5xl" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</div>
+<h3 class="text-xl font-bold text-red-800 mb-2">Issues Detected</h3>
+<p class="text-red-700 max-w-xs mb-8 text-sm leading-relaxed">
+The analyzer has identified data quality concerns that may impact campaign performance. Please review before proceeding.
+</p>
+<div class="w-full bg-white/70 rounded-lg p-4 flex items-center justify-between border border-red-100">
+<div class="text-left">
+<p class="text-[10px] uppercase tracking-wider font-bold text-red-700 mb-1">Action Required</p>
+<p class="text-sm font-semibold text-red-900">3 records flagged for data validation</p>
+</div>
+<span class="material-symbols-outlined text-red-600 text-xl">warning</span>
+</div>
+</div>
+</div>
+<!-- Right: Quick Stats -->
+<div class="col-span-5 space-y-4">
+<h3 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">Quick Stats</h3>
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-low p-5 rounded-lg ring-1 ring-black/[0.03]">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[11px] font-bold text-on-surface-variant uppercase">Predicted Reach</span>
+<span class="material-symbols-outlined text-primary text-lg">groups</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="analyzer-predicted-reach" class="text-2xl font-extrabold text-on-surface">0</span>
+<span class="text-xs font-bold text-green-600 flex items-center">
+<span class="material-symbols-outlined text-sm">arrow_upward</span> 12%
+</span>
+</div>
+<div class="mt-3 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full w-3/4"></div>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-low p-5 rounded-lg ring-1 ring-black/[0.03]">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[11px] font-bold text-on-surface-variant uppercase">Confidence Score</span>
+<span class="material-symbols-outlined text-primary text-lg">psychology</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="analyzer-confidence" class="text-2xl font-extrabold text-on-surface">0%</span>
+</div>
+<p class="mt-2 text-[11px] text-on-surface-variant leading-tight">High statistical significance based on recent historical performance metrics.</p>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container-low p-5 rounded-lg ring-1 ring-black/[0.03]">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[11px] font-bold text-on-surface-variant uppercase">Data Integrity</span>
+<span class="material-symbols-outlined text-primary text-lg">database</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="text-[10px] text-on-surface-variant">Validation</span>
+<span id="analyzer-data-integrity" class="text-[10px] font-bold text-on-surface">0%</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full">
+<div class="h-full bg-green-500 rounded-full w-[99%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="bg-surface-container-low p-5 rounded-lg space-y-3">
+<a href="#" onclick="openModal('bucketing-modal'); closeModal('smart-analyzer-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
+<span class="font-semibold">Continue to Bucketing</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</a>
+<a href="#" onclick="openModal('data-review-modal'); closeModal('smart-analyzer-modal')" class="flex items-center justify-between p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
+<span>Back to Data Review</span>
+<span class="material-symbols-outlined">arrow_back</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Bucketing Modal -->
+<div id="bucketing-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface-container-lowest w-full max-w-4xl max-h-[90vh] wizard-modal-window flex flex-col shadow-[0_12px_40px_rgba(26,28,28,0.15)] rounded-lg overflow-hidden border border-outline-variant/15">
+<!-- Progress Bar -->
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative wizard-stepper">
+<!-- Progress Line -->
+<div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
+<div class="absolute top-4 left-0 w-1/2 h-[2px] bg-primary z-0"></div>
+<!-- Step 1: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
+</div>
+<!-- Step 2: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Analyzer</span>
+</div>
+<!-- Step 3: Active -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center ring-4 ring-primary/20 shadow-md">
+<span class="text-xs font-bold">3</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Bucketing</span>
+</div>
+<!-- Step 4: Pending -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center">
+<span class="text-xs font-bold">4</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Creative</span>
+</div>
+<!-- Step 5: Pending -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center">
+<span class="text-xs font-bold">5</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Launch</span>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="flex-1 overflow-y-auto p-8 bg-surface">
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary" data-weight="fill">auto_awesome</span>
+<h3 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">AI Recommended Segments</h3>
+</div>
+<p class="text-on-surface-variant text-sm max-w-2xl leading-relaxed">
+Based on your campaign objectives, our engine has identified three high-probability audience clusters. Select the buckets you wish to target.
+</p>
+</div>
+<!-- Audience Segments -->
+<div id="bucketing-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"></div>
+<!-- Navigation -->
+<div class="flex justify-between items-center pt-6 border-t border-outline-variant/10">
+<a href="#" onclick="openModal('smart-analyzer-modal'); closeModal('bucketing-modal')" class="flex items-center gap-2 px-6 py-2.5 text-on-surface-variant font-bold text-sm hover:bg-surface-container-high transition-colors rounded">
+<span class="material-symbols-outlined">arrow_back</span>
+Back to Smart Analyzer
+</a>
+<a href="#" onclick="openModal('email-modal'); closeModal('bucketing-modal')" class="bg-primary text-on-primary px-8 py-2.5 rounded font-bold text-sm shadow-md hover:shadow-lg hover:translate-y-[-1px] active:translate-y-0 active:shadow-sm transition-all flex items-center gap-2">
+Continue to Creative
+<span class="material-symbols-outlined">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<!-- Email/Creative Modal -->
+<div id="email-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<!-- Modal Header -->
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative wizard-stepper">
+<!-- Progress Line -->
+<div class="absolute top-4 left-0 w-full h-[2px] bg-outline-variant/20 z-0"></div>
+<div class="absolute top-4 left-0 w-3/4 h-[2px] bg-primary z-0"></div>
+<!-- Step 1: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
+</div>
+<!-- Step 2: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Analyzer</span>
+</div>
+<!-- Step 3: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Bucketing</span>
+</div>
+<!-- Step 4: Active -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
+<span class="text-xs font-bold">4</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Creative</span>
+</div>
+<!-- Step 5 -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center border-2 border-surface-container">
+<span class="text-xs font-bold">5</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant/60">Launch</span>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="flex-1 overflow-y-auto p-12 bg-surface">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Email Composer -->
+<div class="col-span-7 space-y-8">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Email Creative</h2>
+<p class="text-sm text-on-surface-variant">Craft your campaign message with AI assistance.</p>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Subject Line</label>
+<input id="creative-subject-input" type="text" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm" placeholder="Enter compelling subject line..." value="">
+</div>
+<div>
+<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Email Body</label>
+<textarea id="creative-body-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[200px]" placeholder="Write your email content..."></textarea>
+</div>
+<div>
+<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Bucket</label>
+<select id="creative-bucket-select" class="w-full bg-surface-container-low border-0 rounded-lg p-3 text-sm"></select>
+</div>
+</div>
+</div>
+<!-- Right: Preview & Actions -->
+<div class="col-span-5 space-y-6">
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Email Preview</h3>
+<div class="bg-white p-4 rounded border text-xs">
+<div id="creative-preview-subject" class="font-bold mb-2">Subject:</div>
+<div id="creative-preview-body" class="text-gray-600 leading-relaxed"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Quick Actions</h3>
+<div class="space-y-3">
+<a href="#" onclick="openModal('launch-modal'); closeModal('email-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
+<span class="font-semibold">Continue to Launch</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</a>
+<a href="#" onclick="closeModal('email-modal')" class="flex items-center justify-between p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
+<span>Save Draft</span>
+<span class="material-symbols-outlined">save</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="px-12 py-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-start items-center">
+<a href="#" onclick="openModal('bucketing-modal'); closeModal('email-modal')" class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-primary hover:bg-surface-container-high transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+Back to Bucketing
+</a>
+</div>
+</div>
+</div>
+
+<!-- Launch Modal -->
+<div id="launch-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-4xl max-h-[90vh] wizard-modal-window overflow-hidden flex flex-col rounded shadow-2xl custom-shadow border-0">
+<!-- Modal Header -->
+<div class="bg-surface-container-low px-12 py-8 border-b-0">
+<div class="flex justify-between items-center relative wizard-stepper">
+<!-- Progress Line -->
+<div class="absolute top-4 left-0 w-full h-[2px] bg-primary z-0"></div>
+<!-- Step 1: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Data Review</span>
+</div>
+<!-- Step 2: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Analyzer</span>
+</div>
+<!-- Step 3: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Bucketing</span>
+</div>
+<!-- Step 4: Complete -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Creative</span>
+</div>
+<!-- Step 5: Active -->
+<div class="relative z-10 flex flex-col items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_0_10px_rgba(0,93,169,0.3)]">
+<span class="text-xs font-bold">5</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Launch</span>
+</div>
+</div>
+</div>
+<!-- Modal Content -->
+<div class="flex-1 overflow-y-auto p-12 bg-surface">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Launch Summary -->
+<div class="col-span-7 space-y-8">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface mb-2">Campaign Launch Summary</h2>
+<p class="text-sm text-on-surface-variant">Review final details before launching your campaign.</p>
+</div>
+<div class="space-y-6">
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Campaign Details</h3>
+<div class="grid grid-cols-2 gap-4 text-sm">
+<div><span class="text-on-surface-variant">Name:</span> <span id="launch-campaign-name">-</span></div>
+<div><span class="text-on-surface-variant">Segments:</span> <span id="launch-selected-segments">0 Selected</span></div>
+<div><span class="text-on-surface-variant">Total Reach:</span> <span id="launch-total-reach">0 Leads</span></div>
+<div><span class="text-on-surface-variant">Est. Send Time:</span> Immediate</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Quality Checks</h3>
+<div id="launch-quality-checks" class="space-y-3"></div>
+</div>
+</div>
+</div>
+<!-- Right: Launch Actions -->
+<div class="col-span-5 space-y-6">
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Launch Campaign</h3>
+<p class="text-sm text-on-surface-variant mb-6">Your campaign is ready to launch. This action cannot be undone.</p>
+<div class="space-y-3">
+<button onclick="launchCampaign()" class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors font-semibold">
+<span class="material-symbols-outlined">rocket_launch</span>
+Launch Campaign Now
+</button>
+<a href="#" onclick="closeModal('launch-modal')" class="flex items-center justify-center gap-2 p-3 bg-surface-container-highest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">schedule</span>
+Schedule for Later
+</a>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-on-surface mb-4">Need Help?</h3>
+<p class="text-sm text-on-surface-variant">Contact our campaign specialists for assistance.</p>
+<a href="#" onclick="openModal('feedback-modal'); closeModal('launch-modal')" class="flex items-center gap-2 mt-4 text-primary hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined">contact_support</span>
+Get Support
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="px-12 py-6 bg-surface-container-low border-t border-outline-variant/10 flex justify-start items-center">
+<a href="#" onclick="openModal('email-modal'); closeModal('launch-modal')" class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-primary hover:bg-surface-container-high transition-colors rounded-lg">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+Back to Creative
+</a>
+</div>
+</div>
+</div>
+
+<!-- Placeholder Modals for other navigation items -->
+<div id="campaigns-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col rounded shadow-2xl">
+<div class="p-8">
+<h2 class="text-2xl font-bold mb-4">Campaigns</h2>
+<p class="text-on-surface-variant mb-6">Manage your marketing campaigns here.</p>
+<button onclick="closeModal('campaigns-modal')" class="px-4 py-2 bg-primary text-on-primary rounded">Close</button>
+</div>
+</div>
+</div>
+
+<div id="tasks-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col rounded shadow-2xl">
+<div class="p-8">
+<h2 class="text-2xl font-bold mb-4">Tasks</h2>
+<p class="text-on-surface-variant mb-6">View and manage your campaign tasks.</p>
+<button onclick="closeModal('tasks-modal')" class="px-4 py-2 bg-primary text-on-primary rounded">Close</button>
+</div>
+</div>
+</div>
+
+<div id="files-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col rounded shadow-2xl">
+<div class="p-8">
+<h2 class="text-2xl font-bold mb-4">Files</h2>
+<p class="text-on-surface-variant mb-6">Access campaign files and assets.</p>
+<button onclick="closeModal('files-modal')" class="px-4 py-2 bg-primary text-on-primary rounded">Close</button>
+</div>
+</div>
+</div>
+
+<div id="setup-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col rounded shadow-2xl">
+<div class="p-8">
+<h2 class="text-2xl font-bold mb-4">Setup</h2>
+<p class="text-on-surface-variant mb-6">Configure your campaign settings.</p>
+<button onclick="closeModal('setup-modal')" class="px-4 py-2 bg-primary text-on-primary rounded">Close</button>
+</div>
+</div>
+</div>
+
+<div id="feedback-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+<div class="bg-surface w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col rounded shadow-2xl">
+<div class="p-8">
+<h2 class="text-2xl font-bold mb-4">Feedback</h2>
+<p class="text-on-surface-variant mb-6">Send us your feedback and suggestions.</p>
+<button onclick="closeModal('feedback-modal')" class="px-4 py-2 bg-primary text-on-primary rounded">Close</button>
+</div>
+</div>
+</div>
+
+<!-- JavaScript for Modal Functionality -->
+<script>
+const campaignState = {
+    result: null,
+    selectedBucketIds: [],
+    creativeByBucket: {},
+};
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const mainContent = document.getElementById('main-content');
+
+    if (modal && mainContent) {
+        modal.classList.remove('hidden');
+        mainContent.style.filter = 'blur(4px)';
+        mainContent.style.pointerEvents = 'none';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const mainContent = document.getElementById('main-content');
+
+    if (modal && mainContent) {
+        modal.classList.add('hidden');
+        mainContent.style.filter = 'none';
+        mainContent.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function formatInt(value) {
+    return Number(value || 0).toLocaleString();
+}
+
+async function runCampaignPipeline() {
+    const about = (document.getElementById('campaign-about-input')?.value || '').trim();
+    const campaignFor = (document.getElementById('campaign-for-input')?.value || '').trim();
+    const success = (document.getElementById('campaign-success-input')?.value || '').trim();
+
+    if (!about || !campaignFor || !success) {
+        alert('Please fill About, For, and Success Conditions before starting the wizard.');
+        return false;
+    }
+
+    const response = await fetch('/api/internal/campaign/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            about: about,
+            campaign_for: campaignFor,
+            success_conditions: success,
+        }),
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || 'Campaign run failed.');
+    }
+
+    campaignState.result = await response.json();
+    campaignState.selectedBucketIds = [];
+    campaignState.creativeByBucket = {};
+    hydrateWizard();
+    return true;
+}
+
+function hydrateWizard() {
+    const result = campaignState.result;
+    if (!result) {
+        return;
+    }
+
+    const dr = result.data_review || {};
+    const analyzer = result.analyzer || {};
+    const buckets = result.buckets || [];
+
+    document.getElementById('dr-campaign-name').textContent = dr.campaign_name || '-';
+    document.getElementById('dr-source-db').textContent = dr.source_database || '-';
+    document.getElementById('dr-estimated-reach').textContent = formatInt(dr.estimated_reach) + ' Leads';
+    document.getElementById('dr-target-summary').textContent = dr.target_summary || '-';
+
+    document.getElementById('analyzer-message').textContent = analyzer.message || 'Analyzer results unavailable.';
+    document.getElementById('analyzer-primary-insight').textContent = analyzer.possible ? 'Audience rows found for campaign inputs.' : 'No rows returned for current campaign inputs.';
+    document.getElementById('analyzer-predicted-reach').textContent = formatInt(analyzer.predicted_reach || 0);
+    document.getElementById('analyzer-confidence').textContent = (analyzer.confidence_score || 0) + '%';
+    document.getElementById('analyzer-data-integrity').textContent = (analyzer.data_integrity || 0) + '%';
+    document.getElementById('analyzer-status-title').textContent = analyzer.possible ? 'Analysis Complete' : 'No Reachable Audience';
+
+    const statusBox = document.getElementById('analyzer-status-box');
+    const failBox = document.getElementById('analyzer-fail-box');
+    if (analyzer.possible) {
+        statusBox.classList.remove('hidden');
+        failBox.classList.add('hidden');
+    } else {
+        statusBox.classList.add('hidden');
+        failBox.classList.remove('hidden');
+    }
+
+    renderBucketCards(buckets);
+    renderCreativeBucketSelect();
+    renderLaunchSummary();
+}
+
+function renderBucketCards(buckets) {
+    const container = document.getElementById('bucketing-cards');
+    container.innerHTML = '';
+
+    if (!buckets.length) {
+        container.innerHTML = '<div class="p-6 rounded-lg bg-surface-container-low text-sm text-on-surface-variant">No buckets were generated for these campaign inputs.</div>';
+        return;
+    }
+
+    buckets.forEach((bucket) => {
+        const selected = campaignState.selectedBucketIds.includes(bucket.id);
+        const card = document.createElement('div');
+        card.className = 'relative group p-6 rounded-lg border cursor-pointer transition-all ' + (selected ? 'bg-surface-container-lowest border-primary shadow-sm' : 'bg-surface-container-low border-outline-variant/20');
+        card.innerHTML = `
+            <div class="absolute top-4 right-4">
+                <div class="w-5 h-5 rounded-full ${selected ? 'bg-primary' : 'border-2 border-outline-variant'} flex items-center justify-center">
+                    <span class="material-symbols-outlined text-${selected ? 'on-primary' : 'outline-variant'} text-[14px]">${selected ? 'check' : ''}</span>
+                </div>
+            </div>
+            <div>
+                <div class="text-[10px] font-bold uppercase tracking-widest mb-1 ${selected ? 'text-primary' : 'text-on-surface-variant'}">Bucket ${bucket.rank}</div>
+                <h4 class="text-lg font-bold text-on-surface leading-tight">${bucket.name}</h4>
+                <p class="text-xs text-on-surface-variant mt-2 leading-relaxed">${bucket.rationale || 'No rationale provided.'}</p>
+            </div>
+            <div class="flex items-center gap-4 mt-4">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
+                    <span class="text-sm font-bold">${formatInt(bucket.row_count)}</span>
+                </div>
+                <div class="h-6 w-[1px] bg-outline-variant/30"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-on-surface-variant uppercase font-medium">Treatment</span>
+                    <span class="text-sm font-bold text-primary">${bucket.suggested_treatment || 'N/A'}</span>
+                </div>
+            </div>
+        `;
+        card.addEventListener('click', function () {
+            toggleBucketSelection(bucket.id);
+        });
+        container.appendChild(card);
+    });
+}
+
+function toggleBucketSelection(bucketId) {
+    const idx = campaignState.selectedBucketIds.indexOf(bucketId);
+    if (idx >= 0) {
+        campaignState.selectedBucketIds.splice(idx, 1);
+    } else {
+        campaignState.selectedBucketIds.push(bucketId);
+    }
+
+    renderBucketCards(campaignState.result?.buckets || []);
+    renderCreativeBucketSelect();
+    renderLaunchSummary();
+}
+
+function getSelectedBuckets() {
+    const allBuckets = campaignState.result?.buckets || [];
+    return allBuckets.filter((bucket) => campaignState.selectedBucketIds.includes(bucket.id));
+}
+
+function renderCreativeBucketSelect() {
+    const select = document.getElementById('creative-bucket-select');
+    const selectedBuckets = getSelectedBuckets();
+    select.innerHTML = '';
+
+    if (!selectedBuckets.length) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Select at least one bucket in Bucketing step';
+        select.appendChild(opt);
+        document.getElementById('creative-subject-input').value = '';
+        document.getElementById('creative-body-input').value = '';
+        updateCreativePreview();
+        return;
+    }
+
+    selectedBuckets.forEach((bucket) => {
+        const opt = document.createElement('option');
+        opt.value = String(bucket.id);
+        opt.textContent = `${bucket.name} (${formatInt(bucket.row_count)} rows)`;
+        select.appendChild(opt);
+    });
+
+    const firstId = Number(select.value || selectedBuckets[0].id);
+    loadCreativeForBucket(firstId);
+}
+
+function loadCreativeForBucket(bucketId) {
+    const bucket = (campaignState.result?.buckets || []).find((item) => item.id === bucketId);
+    if (!bucket) {
+        return;
+    }
+
+    const draft = campaignState.creativeByBucket[bucketId] || {
+        subject: bucket.email_subject || `Campaign for ${bucket.name}`,
+        body: bucket.email_body || '',
+    };
+
+    campaignState.creativeByBucket[bucketId] = draft;
+    document.getElementById('creative-subject-input').value = draft.subject;
+    document.getElementById('creative-body-input').value = draft.body;
+    updateCreativePreview();
+}
+
+function updateCreativePreview() {
+    const subjectInput = document.getElementById('creative-subject-input');
+    const bodyInput = document.getElementById('creative-body-input');
+    document.getElementById('creative-preview-subject').textContent = 'Subject: ' + (subjectInput.value || '');
+    document.getElementById('creative-preview-body').innerHTML = (bodyInput.value || '').replace(/\n/g, '<br>');
+
+    const bucketId = Number(document.getElementById('creative-bucket-select').value || 0);
+    if (bucketId) {
+        campaignState.creativeByBucket[bucketId] = {
+            subject: subjectInput.value,
+            body: bodyInput.value,
+        };
+    }
+}
+
+function renderLaunchSummary() {
+    const selectedBuckets = getSelectedBuckets();
+    const totalReach = selectedBuckets.reduce((sum, bucket) => sum + Number(bucket.row_count || 0), 0);
+    const campaignName = campaignState.result?.data_review?.campaign_name || '-';
+    const qualityChecks = campaignState.result?.launch?.quality_checks || [];
+
+    document.getElementById('launch-campaign-name').textContent = campaignName;
+    document.getElementById('launch-selected-segments').textContent = `${selectedBuckets.length} Selected`;
+    document.getElementById('launch-total-reach').textContent = `${formatInt(totalReach)} Leads`;
+
+    const checksContainer = document.getElementById('launch-quality-checks');
+    checksContainer.innerHTML = '';
+    qualityChecks.forEach((check) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-3';
+        row.innerHTML = `<span class="material-symbols-outlined ${check.passed ? 'text-green-600' : 'text-red-600'}">${check.passed ? 'check_circle' : 'cancel'}</span><span class="text-sm">${check.label}</span>`;
+        checksContainer.appendChild(row);
+    });
+}
+
+function getLaunchDateLabel() {
+    return new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+    });
+}
+
+function renderPreviousCampaigns(campaignRows) {
+    const tbody = document.getElementById('previous-campaigns-body');
+    if (!tbody) {
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    campaignRows.forEach((item) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-surface-container-low/50 transition-colors';
+        row.innerHTML = `
+            <td class="px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-primary-fixed flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
+                    </div>
+                    <span class="font-semibold text-on-surface">${item.campaign_name || 'Campaign'}</span>
+                </div>
+            </td>
+            <td class="px-6 py-5">
+                <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">${item.status || 'Launched'}</span>
+            </td>
+            <td class="px-6 py-5 text-sm text-on-surface-variant">${item.launch_date || getLaunchDateLabel()}</td>
+            <td class="px-6 py-5">
+                <p class="text-[10px] text-on-surface-variant uppercase font-bold">Reach</p>
+                <p class="text-sm font-bold text-primary">${formatInt(item.total_reach || 0)}</p>
+            </td>
+            <td class="px-6 py-5 text-right">
+                <button class="text-on-surface-variant hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    const summary = document.getElementById('previous-campaigns-summary');
+    if (summary) {
+        const count = campaignRows.length;
+        summary.textContent = `Showing ${count} campaigns`;
+    }
+}
+
+async function loadPreviousCampaigns() {
+    try {
+        const response = await fetch('/api/internal/campaign/history');
+        if (!response.ok) {
+            throw new Error('Unable to load campaign history');
+        }
+        const rows = await response.json();
+        renderPreviousCampaigns(Array.isArray(rows) ? rows : []);
+    } catch (_err) {
+        renderPreviousCampaigns([]);
+    }
+}
+
+function resetCampaignFormAndWorkflow() {
+    const aboutInput = document.getElementById('campaign-about-input');
+    const forInput = document.getElementById('campaign-for-input');
+    const successInput = document.getElementById('campaign-success-input');
+
+    if (aboutInput) {
+        aboutInput.value = '';
+    }
+    if (forInput) {
+        forInput.value = '';
+    }
+    if (successInput) {
+        successInput.value = '';
+    }
+
+    campaignState.result = null;
+    campaignState.selectedBucketIds = [];
+    campaignState.creativeByBucket = {};
+
+    document.getElementById('dr-campaign-name').textContent = '-';
+    document.getElementById('dr-source-db').textContent = '-';
+    document.getElementById('dr-estimated-reach').textContent = '-';
+    document.getElementById('dr-target-summary').textContent = '-';
+
+    document.getElementById('bucketing-cards').innerHTML = '';
+    document.getElementById('creative-bucket-select').innerHTML = '';
+    document.getElementById('creative-subject-input').value = '';
+    document.getElementById('creative-body-input').value = '';
+    updateCreativePreview();
+
+    document.getElementById('launch-campaign-name').textContent = '-';
+    document.getElementById('launch-selected-segments').textContent = '0 Selected';
+    document.getElementById('launch-total-reach').textContent = '0 Leads';
+    document.getElementById('launch-quality-checks').innerHTML = '';
+}
+
+async function launchCampaign() {
+    if (!campaignState.result) {
+        alert('Run the campaign pipeline first.');
+        return;
+    }
+
+    const selectedBuckets = getSelectedBuckets();
+    const totalReach = selectedBuckets.reduce((sum, bucket) => sum + Number(bucket.row_count || 0), 0);
+
+    if (!selectedBuckets.length || totalReach === 0) {
+        alert('Cannot launch: no reachable rows from selected buckets.');
+        return;
+    }
+
+    const response = await fetch('/api/internal/campaign/launch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            campaign_name: campaignState.result.data_review?.campaign_name,
+            selected_buckets: selectedBuckets,
+            creative: campaignState.creativeByBucket,
+            total_reach: totalReach,
+        }),
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+        alert(payload.error || 'Launch failed.');
+        return;
+    }
+
+    await loadPreviousCampaigns();
+    resetCampaignFormAndWorkflow();
+    closeModal('launch-modal');
+    alert(`Campaign launched: ${payload.campaign_name} (${payload.total_reach} rows)`);
+}
+
+document.getElementById('start-campaign-wizard-btn').addEventListener('click', async function (event) {
+    event.preventDefault();
+    openModal('data-review-modal');
+    document.getElementById('dr-campaign-name').textContent = 'Loading...';
+    document.getElementById('dr-source-db').textContent = 'Loading...';
+    document.getElementById('dr-estimated-reach').textContent = 'Loading...';
+    document.getElementById('dr-target-summary').textContent = 'Loading...';
+    try {
+        await runCampaignPipeline();
+    } catch (err) {
+        closeModal('data-review-modal');
+        alert(err.message || 'Unable to run campaign pipeline.');
+    }
+});
+
+document.getElementById('creative-bucket-select').addEventListener('change', function (event) {
+    loadCreativeForBucket(Number(event.target.value));
+});
+
+document.getElementById('creative-subject-input').addEventListener('input', updateCreativePreview);
+document.getElementById('creative-body-input').addEventListener('input', updateCreativePreview);
+
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal-backdrop')) {
+        closeModal(event.target.id);
+    }
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal-backdrop:not(.hidden)');
+        openModals.forEach(modal => {
+            closeModal(modal.id);
+        });
+    }
+});
+
+loadPreviousCampaigns();
+</script>
+
+</body></html>
