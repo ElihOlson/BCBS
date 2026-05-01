@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 from flask import Flask, send_file, jsonify, request
@@ -25,7 +26,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 from supabaseUtils import supabaseInteractions
 from codeAgents import bucketingAgent, emailAgent
-from main import normalize_generated_bucket_sqls
+from main import normalize_generated_bucket_sqls, json_to_csv, export_sql_results, read_bucket_rows
 
 sb = supabaseInteractions()
 bkt_agent = bucketingAgent()
@@ -53,6 +54,22 @@ startup_checks()
 
 # 3. FLASK APP & ROUTES
 app = Flask(__name__)
+
+
+def build_campaign_bucket_prefix(about, campaign_for, success_conditions):
+    """Build a short deterministic label from user inputs for bucket names."""
+    raw = f"{about} {campaign_for} {success_conditions}".strip().lower()
+    tokens = re.findall(r"[a-z0-9]+", raw)
+    if not tokens:
+        return "Campaign"
+
+    stop_words = {
+        "the", "and", "for", "with", "from", "that", "this", "into", "your",
+        "are", "was", "were", "have", "has", "had", "about", "campaign", "members",
+    }
+    meaningful = [t for t in tokens if t not in stop_words]
+    selected = (meaningful or tokens)[:3]
+    return " ".join(word.capitalize() for word in selected)
 
 @app.route('/')
 @app.route('/home')
@@ -86,16 +103,26 @@ def api_campaign_run():
 
         buckets = []
         total_reach = 0
+        campaign_prefix = build_campaign_bucket_prefix(about, campaign_for, success_conditions)
+
+        # Override bucket names with user-input-based names BEFORE writing CSVs
+        for idx, bucket in enumerate(bucket_payload.get("buckets", []), start=1):
+            bucket["name"] = f"{campaign_prefix} - Segment {idx}"
+
+        seen_bucket_names = {}
         for idx, bucket in enumerate(bucket_payload.get("buckets", []), start=1):
             sql = (bucket.get("sql") or "").strip()
             results = sb.run_sql_query(sql) if sql else []
             row_count = len(results) if isinstance(results, list) else 0
             total_reach += row_count
             email_body = email_agent.genEmail(sql, bucket.get("rationale", ""), campaign_request)
+
+            final_bucket_name = bucket["name"]
+
             buckets.append({
                 "id": idx,
                 "rank": bucket.get("rank") or idx,
-                "name": bucket.get("name") or f"Bucket {idx}",
+                "name": final_bucket_name,
                 "sql": sql,
                 "rationale": bucket.get("rationale") or "",
                 "suggested_treatment": bucket.get("suggested_treatment") or "",
@@ -106,6 +133,16 @@ def api_campaign_run():
             })
 
         campaign_possible = any(b["row_count"] > 0 for b in buckets)
+
+        # Write CSVs using the updated bucket_payload (with user-input names)
+        try:
+            bucket_output_path = basedir / "bucket_output.csv"
+            bucket_output_path.write_text(json_to_csv(json.dumps(bucket_payload)), encoding="utf-8")
+            bucket_rows = read_bucket_rows(bucket_output_path)
+            export_sql_results(bucket_rows, basedir / "SQL_results.csv", sb)
+        except Exception as csv_exc:
+            print(f"[CSV export warning] {csv_exc}")
+
         return jsonify({
             "campaign_request": campaign_request,
             "analyzer": {

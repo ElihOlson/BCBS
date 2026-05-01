@@ -453,14 +453,14 @@ Our Smart Analyzer has processed your audience data and campaign parameters. The
 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
 <span class="material-symbols-outlined text-red-600 text-5xl" style="font-variation-settings: 'FILL' 1;">cancel</span>
 </div>
-<h3 class="text-xl font-bold text-red-800 mb-2">Issues Detected</h3>
+<h3 class="text-xl font-bold text-red-800 mb-2">No Data Found</h3>
 <p class="text-red-700 max-w-xs mb-8 text-sm leading-relaxed">
-The analyzer has identified data quality concerns that may impact campaign performance. Please review before proceeding.
+No matching records exist for the given campaign inputs. Please go back and revise your target audience or campaign parameters.
 </p>
 <div class="w-full bg-white/70 rounded-lg p-4 flex items-center justify-between border border-red-100">
 <div class="text-left">
 <p class="text-[10px] uppercase tracking-wider font-bold text-red-700 mb-1">Action Required</p>
-<p class="text-sm font-semibold text-red-900">3 records flagged for data validation</p>
+<p class="text-sm font-semibold text-red-900">Update your inputs and re-run the analysis</p>
 </div>
 <span class="material-symbols-outlined text-red-600 text-xl">warning</span>
 </div>
@@ -485,7 +485,7 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 
 <!-- Quick Actions -->
 <div class="bg-surface-container-low p-5 rounded-lg space-y-3">
-<a href="#" onclick="openModal('bucketing-modal'); closeModal('smart-analyzer-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
+<a id="continue-to-bucketing-btn" href="#" onclick="openModal('bucketing-modal'); closeModal('smart-analyzer-modal')" class="flex items-center justify-between p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors">
 <span class="font-semibold">Continue to Bucketing</span>
 <span class="material-symbols-outlined">arrow_forward</span>
 </a>
@@ -869,7 +869,32 @@ async function runCampaign() {
 // ─── Populate: Analyzer ───────────────────────────────────
 function populateAnalyzer(analyzer) {
     const reach = document.getElementById('analyzer-reach');
-    if (reach) reach.textContent = analyzer.predicted_reach?.toLocaleString() ?? '—';
+    const predicted = analyzer.predicted_reach ?? 0;
+    if (reach) reach.textContent = predicted > 0 ? predicted.toLocaleString() : '0';
+
+    const passBox = document.getElementById('analyzer-status-box');
+    const failBox = document.getElementById('analyzer-fail-box');
+    const continueBtn = document.getElementById('continue-to-bucketing-btn');
+
+    if (predicted === 0) {
+        if (passBox) passBox.classList.add('hidden');
+        if (failBox) failBox.classList.remove('hidden');
+        if (continueBtn) {
+            continueBtn.removeAttribute('href');
+            continueBtn.removeAttribute('onclick');
+            continueBtn.classList.remove('bg-primary', 'text-on-primary', 'hover:bg-primary-container');
+            continueBtn.classList.add('bg-surface-container-highest', 'text-on-surface-variant', 'opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+    } else {
+        if (passBox) passBox.classList.remove('hidden');
+        if (failBox) failBox.classList.add('hidden');
+        if (continueBtn) {
+            continueBtn.setAttribute('href', '#');
+            continueBtn.setAttribute('onclick', "openModal('bucketing-modal'); closeModal('smart-analyzer-modal')");
+            continueBtn.classList.add('bg-primary', 'text-on-primary', 'hover:bg-primary-container');
+            continueBtn.classList.remove('bg-surface-container-highest', 'text-on-surface-variant', 'opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+    }
 }
 
 // ─── Populate: Buckets ────────────────────────────────────
