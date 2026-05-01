@@ -144,36 +144,11 @@
 </div>
 </div>
 <nav class="space-y-1">
-<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('campaigns-modal')">
-<span class="material-symbols-outlined" data-icon="home">home</span>
-<span>Home</span>
-</a>
 <a class="flex items-center gap-3 px-4 py-2 text-blue-700 dark:text-blue-300 bg-white/50 dark:bg-slate-800/50 border-l-4 border-blue-600 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('campaigns-modal')">
 <span class="material-symbols-outlined" data-icon="campaign">campaign</span>
 <span>Campaigns</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('tasks-modal')">
-<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
-<span>Tasks</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('files-modal')">
-<span class="material-symbols-outlined" data-icon="folder">folder</span>
-<span>Files</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold transition-transform duration-200 hover:translate-x-1" href="#" onclick="openModal('setup-modal')">
-<span class="material-symbols-outlined" data-icon="settings">settings</span>
-<span>Setup</span>
-</a>
 </nav>
-</div>
-<div class="mt-auto p-6 border-t border-outline-variant/10">
-<button class="w-full py-3 bg-primary-gradient text-white rounded-lg font-bold text-sm shadow-md active:opacity-80 transition-all" onclick="openModal('data-review-modal')">
-                New Record
-            </button>
-<div class="mt-6 flex items-center gap-3 px-4 py-2 text-slate-500 hover:bg-slate-200/50 font-sans text-xs uppercase tracking-wider font-semibold cursor-pointer" onclick="openModal('feedback-modal')">
-<span class="material-symbols-outlined" data-icon="comment">comment</span>
-<span>Feedback</span>
-</div>
 </div>
 </aside>
 <!-- Main Content Area -->
@@ -185,7 +160,6 @@
 <div class="h-6 w-[1px] bg-outline-variant/30"></div>
 </div>
 <nav class="flex items-center gap-6">
-<a class="text-slate-600 dark:text-slate-400 hover:text-blue-600 font-sans text-sm font-medium tracking-tight hover:bg-slate-200/50 transition-colors px-2 py-1 rounded" href="#">Dashboard</a>
 <a class="text-blue-700 dark:text-blue-300 border-b-2 border-blue-600 pb-1 font-sans text-sm font-medium tracking-tight transition-colors" href="#" onclick="openModal('campaigns-modal')">Campaigns</a>
 </nav>
 </div>
@@ -201,9 +175,6 @@
 <span class="material-symbols-outlined" data-icon="help">help</span>
 </button>
 </div>
-<a href="#" onclick="openModal('data-review-modal')" class="px-4 py-1.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-container transition-colors inline-block">
-                    Create Campaign
-                </a>
 <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/20">
 <img alt="User Profile" data-alt="professional headshot of a smiling executive man in a tailored dark blue suit against a clean grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7bYk5VYugAANj2gipfn4GWiAoMasaT4Du5aIQy76Od0EowUHv5lNQCtCNsOKamgJqlrnzFiVDRPPvgJ-hUaAPkSVsSEe1XRS5rZ3-qjYlXfQ6rj8TabCrjPcOtj3FsGQ_htN7PIIdTKQa6vFFDX3n1MzDL_uZ0Psd8Wo7mtQ_LDWbPOCJmcuuY3Rn6DzhkIEv2hsR9Fo-Suj7TKppv3doc-LVPAzrDISX-i4UmErZKzy3610-ayLaacfVlx3ciwcgxK2EnhKBPDA"/>
 </div>
@@ -257,148 +228,6 @@
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Key Performance Indicators</label>
 <textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
 </div>
-</div>
-<!-- Previous Campaigns Table -->
-<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm overflow-hidden">
-<div class="px-6 py-5 flex items-center justify-between border-b border-outline-variant/5">
-<h3 class="font-bold text-lg text-on-surface">Previous Campaigns</h3>
-<div class="flex items-center gap-3">
-<div class="relative">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" data-icon="search">search</span>
-<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-0 rounded-lg text-xs w-64 focus:ring-1 focus:ring-primary" placeholder="Filter campaigns..." type="text"/>
-</div>
-<button class="p-2 hover:bg-surface-container-low rounded transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant" data-icon="filter_list">filter_list</span>
-</button>
-</div>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-surface-container-high">
-<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Name</th>
-<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Status</th>
-<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Launch Date</th>
-<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant">Metrics</th>
-<th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant text-right">Actions</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-outline-variant/10">
-<!-- Row 1 -->
-<tr class="hover:bg-surface-container-low/50 transition-colors">
-<td class="px-6 py-5">
-<div class="flex items-center gap-3">
-<div class="w-8 h-8 rounded bg-primary-fixed flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
-</div>
-<span class="font-semibold text-on-surface">Q4 Enterprise Upsell</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Active</span>
-</td>
-<td class="px-6 py-5 text-sm text-on-surface-variant">Oct 12, 2023</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-4">
-<div>
-<p class="text-[10px] text-on-surface-variant uppercase font-bold">Open Rate</p>
-<p class="text-sm font-bold text-primary">42.8%</p>
-</div>
-<div class="h-6 w-[1px] bg-outline-variant/30"></div>
-<div>
-<p class="text-[10px] text-on-surface-variant uppercase font-bold">CTR</p>
-<p class="text-sm font-bold text-primary">12.1%</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-5 text-right">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
-</button>
-</td>
-</tr>
-<!-- Row 2 -->
-<tr class="hover:bg-surface-container-low/50 transition-colors">
-<td class="px-6 py-5">
-<div class="flex items-center gap-3">
-<div class="w-8 h-8 rounded bg-secondary-container flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
-</div>
-<span class="font-semibold text-on-surface">Mid-Market Outreach</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-tight">Completed</span>
-</td>
-<td class="px-6 py-5 text-sm text-on-surface-variant">Aug 24, 2023</td>
-<td class="px-6 py-5">
-<div class="flex items-center gap-4">
-<div>
-<p class="text-[10px] text-on-surface-variant uppercase font-bold">Open Rate</p>
-<p class="text-sm font-bold text-on-surface">31.5%</p>
-</div>
-<div class="h-6 w-[1px] bg-outline-variant/30"></div>
-<div>
-<p class="text-[10px] text-on-surface-variant uppercase font-bold">CTR</p>
-<p class="text-sm font-bold text-on-surface">4.2%</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-5 text-right">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
-</button>
-</td>
-</tr>
-<!-- Row 3 -->
-<tr class="hover:bg-surface-container-low/50 transition-colors">
-<td class="px-6 py-5">
-<div class="flex items-center gap-3">
-<div class="w-8 h-8 rounded bg-tertiary-fixed flex items-center justify-center text-tertiary">
-<span class="material-symbols-outlined text-sm" data-icon="edit_calendar">edit_calendar</span>
-</div>
-<span class="font-semibold text-on-surface">Spring Nurture Flow</span>
-</div>
-</td>
-<td class="px-6 py-5">
-<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-tight">Draft</span>
-</td>
-<td class="px-6 py-5 text-sm text-on-surface-variant">Scheduled</td>
-<td class="px-6 py-5">
-<p class="text-xs italic text-on-surface-variant">Awaiting initial blast...</p>
-</td>
-<td class="px-6 py-5 text-right">
-<button class="text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
-</button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="px-6 py-4 bg-surface-container-low/30 border-t border-outline-variant/5 flex justify-between items-center">
-<p class="text-xs text-on-surface-variant font-medium">Showing 3 of 12 campaigns</p>
-<div class="flex gap-2">
-<button class="px-3 py-1 bg-surface-container-lowest border border-outline-variant/20 rounded text-xs font-bold hover:bg-surface-container transition-colors disabled:opacity-50">Previous</button>
-<button class="px-3 py-1 bg-surface-container-lowest border border-outline-variant/20 rounded text-xs font-bold hover:bg-surface-container transition-colors">Next</button>
-</div>
-</div>
-</section>
-<!-- Bottom Illustration/Insight Card (Asymmetric Layout) -->
-<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-<div class="lg:col-span-3 bg-primary-gradient p-8 rounded-xl text-white relative overflow-hidden flex flex-col justify-center">
-<div class="relative z-10">
-<h4 class="text-2xl font-black mb-2">Architect Tip</h4>
-<p class="text-blue-100 max-w-md">Companies with documented "Success Conditions" see a 24% higher retention rate. Have you verified yours for the new cycle?</p>
-<button class="mt-6 px-5 py-2 bg-white text-primary rounded font-bold text-sm hover:bg-blue-50 transition-colors">View Best Practices</button>
-</div>
-<div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-<div class="absolute right-8 top-1/2 -translate-y-1/2 opacity-20">
-<span class="material-symbols-outlined !text-[120px]" data-icon="auto_awesome">auto_awesome</span>
-</div>
-</div>
-<div class="lg:col-span-2 bg-surface-container-high rounded-xl overflow-hidden min-h-[200px]">
-<img alt="Data Analytics Visualization" class="w-full h-full object-cover grayscale mix-blend-multiply opacity-60" data-alt="clean dashboard screen showing complex line graphs and bar charts in a professional analytics interface with soft light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6BuFt1cDp_B9xAqV_hysdGb3K5u5gzdmAyFdQQbECBbaoAI8WiRdl1-GX2_i-35YTw5SVrdgM1mLhhGdoim9rRrQyE4WHECeCAL1TsiITkr-FYDwksrlSBhdVA2-0smMtXi77w31JdPccKNQCpally5lYhnrCouYEQaa-d6uhxmm62yKvTfFNzE9qFIjKTwcZxkpQR93d7Q7aNj5zMFDDQpVg453SZoEdmDK2_3UtA4VTAkhEfp7c8D10udaWaoblRDH4eup2Izc"/>
 </div>
 </div>
     </div>
