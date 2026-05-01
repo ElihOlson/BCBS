@@ -8,9 +8,6 @@ from pathlib import Path
 import traceback
 from io import StringIO
 
-
-
-
 def json_to_csv(json_string):
     """
     Inputs:
@@ -268,7 +265,6 @@ def export_sql_results(bucket_rows, output_csv_path, supabase_client):
 
 
 
-sqlagent = sqlAgent()
 bktagent = bucketingAgent()
 sbInteract = supabaseInteractions()
 

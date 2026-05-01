@@ -1,6 +1,5 @@
 from openai import OpenAI
 import os
-from supabase import *
 import json
 from dotenv import load_dotenv
 from pathlib import Path
@@ -11,34 +10,8 @@ load_dotenv(basedir / ".env")
 
 grokKey = os.getenv("MISTRAL_API_KEY")
 grokURL = os.getenv("MISTRAL_API_URL")
-spbsKey = os.getenv("SUPABASE_KEY2")
-spbsUrl = os.getenv("SUPABASE_URL2")
 debug_bucketing_prompt = os.getenv("DEBUG_BUCKETING_PROMPT", "false").lower() == "true"
 
-
-#get emails out
-#fix sql execution
-
-
-class sqlAgent:
-    def __init__(self):
-        
-        #self.client = Groq(api_key=grokKey)
-        self.client = OpenAI(api_key=grokKey,base_url= grokURL) # <-- swap this per provider )
-
-    
-
-    def genSQL(self, prompt, schema):
-        # Single call: return SQL or "INVALID" — avoids sending schema twice
-        sysPrompt = (
-            f"Schema:{schema}\n"
-            "Return a SQL query for the user request. Add (marketing_ai.) before all column names i.e. SELECT m.* FROM marketing_ai.members m"
-            "If the request cannot be answered from the schema, reply only: INVALID"
-        )
-        result = self.sendMessage(prompt, sysPrompt)
-        if result.strip().upper() == "INVALID":
-            return "Bad Request"
-        return result
 
 
 class emailAgent:
