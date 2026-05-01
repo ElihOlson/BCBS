@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
@@ -217,7 +217,7 @@
 <h2 class="text-3xl font-extrabold tracking-tight text-on-surface">Campaign Dashboard</h2>
 <p class="text-on-surface-variant font-medium mt-1">Manage and monitor your enterprise outreach efforts.</p>
 </div>
-<a href="#" id="start-campaign-wizard-btn" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
+<a href="#" onclick="openModal('data-review-modal')" class="flex items-center gap-2 px-6 py-3 bg-primary-gradient text-white rounded-lg font-bold shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
 <span class="material-symbols-outlined" data-icon="magic_button">magic_button</span>
 <span>Start Campaign Wizard</span>
 </a>
@@ -233,7 +233,7 @@
 <h3 class="font-bold text-on-surface">About</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Campaign Narrative</label>
-<textarea id="campaign-about-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Describe the core message and tone of this campaign..."></textarea>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Describe the core message and tone of this campaign..."></textarea>
 </div>
 <!-- Input Card 2 -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
@@ -244,7 +244,7 @@
 <h3 class="font-bold text-on-surface">For</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Target Audience Segment</label>
-<textarea id="campaign-for-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Define the industry, job titles, and firmographics..."></textarea>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="Define the industry, job titles, and firmographics..."></textarea>
 </div>
 <!-- Input Card 3 -->
 <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm hover:shadow-md transition-shadow">
@@ -255,7 +255,7 @@
 <h3 class="font-bold text-on-surface">Success Conditions</h3>
 </div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2 ml-1">Key Performance Indicators</label>
-<textarea id="campaign-success-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[120px] placeholder-on-surface-variant/40" placeholder="List the metrics that define a 'Win' for this project..."></textarea>
 </div>
 </div>
 <!-- Previous Campaigns Table -->
@@ -283,12 +283,101 @@
 <th class="px-6 py-3 font-bold text-[11px] uppercase tracking-wider text-on-surface-variant text-right">Actions</th>
 </tr>
 </thead>
-<tbody id="previous-campaigns-body" class="divide-y divide-outline-variant/10">
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<span class="font-semibold text-on-surface">Q4 Enterprise Upsell</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">Active</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant">Oct 12, 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Open Rate</p>
+<p class="text-sm font-bold text-primary">42.8%</p>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">CTR</p>
+<p class="text-sm font-bold text-primary">12.1%</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-secondary-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+</div>
+<span class="font-semibold text-on-surface">Mid-Market Outreach</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-tight">Completed</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant">Aug 24, 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">Open Rate</p>
+<p class="text-sm font-bold text-on-surface">31.5%</p>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold">CTR</p>
+<p class="text-sm font-bold text-on-surface">4.2%</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-sm" data-icon="edit_calendar">edit_calendar</span>
+</div>
+<span class="font-semibold text-on-surface">Spring Nurture Flow</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase tracking-tight">Draft</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant">Scheduled</td>
+<td class="px-6 py-5">
+<p class="text-xs italic text-on-surface-variant">Awaiting initial blast...</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
 </tbody>
 </table>
 </div>
 <div class="px-6 py-4 bg-surface-container-low/30 border-t border-outline-variant/5 flex justify-between items-center">
-<p id="previous-campaigns-summary" class="text-xs text-on-surface-variant font-medium">Showing 0 campaigns</p>
+<p class="text-xs text-on-surface-variant font-medium">Showing 3 of 12 campaigns</p>
 <div class="flex gap-2">
 <button class="px-3 py-1 bg-surface-container-lowest border border-outline-variant/20 rounded text-xs font-bold hover:bg-surface-container transition-colors disabled:opacity-50">Previous</button>
 <button class="px-3 py-1 bg-surface-container-lowest border border-outline-variant/20 rounded text-xs font-bold hover:bg-surface-container transition-colors">Next</button>
@@ -377,21 +466,21 @@
 <div class="grid grid-cols-2 gap-6">
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Campaign Name</label>
-<div id="dr-campaign-name" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Q4 Enterprise Outreach_v2</div>
 </div>
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Source Database</label>
-<div id="dr-source-db" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Salesforce_Master_Sync</div>
 </div>
 </div>
 <div class="grid grid-cols-2 gap-6">
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Estimated Reach</label>
-<div id="dr-estimated-reach" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">42,850 Leads</div>
 </div>
 <div class="space-y-1">
 <label class="block text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/70">Target Industries</label>
-<div id="dr-target-summary" class="py-2 text-sm font-medium border-b-2 border-primary-container/20">-</div>
+<div class="py-2 text-sm font-medium border-b-2 border-primary-container/20">Technology, Healthcare, Finance</div>
 </div>
 </div>
 </div>
@@ -477,14 +566,14 @@
 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
 <span class="material-symbols-outlined text-green-600 text-5xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
 </div>
-<h3 id="analyzer-status-title" class="text-xl font-bold text-green-800 mb-2">Analysis Complete</h3>
+<h3 class="text-xl font-bold text-green-800 mb-2">Analysis Complete</h3>
 <p class="text-green-700 max-w-xs mb-8 text-sm leading-relaxed">
-<span id="analyzer-message">Our Smart Analyzer has processed your campaign parameters and audience data.</span>
+Our Smart Analyzer has processed your audience data and campaign parameters. The integrity of your dataset meets all enterprise standards for deployment.
 </p>
 <div class="w-full bg-white/70 rounded-lg p-4 flex items-center justify-between border border-green-100">
 <div class="text-left">
 <p class="text-[10px] uppercase tracking-wider font-bold text-green-700 mb-1">Primary Insight</p>
-<p id="analyzer-primary-insight" class="text-sm font-semibold text-green-900">Optimal engagement window: 9AM - 11AM</p>
+<p class="text-sm font-semibold text-green-900">Optimal engagement window: 9AM ΓÇô 11AM</p>
 </div>
 <span class="material-symbols-outlined text-green-600 text-xl">insights</span>
 </div>
@@ -517,7 +606,7 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 <span class="material-symbols-outlined text-primary text-lg">groups</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span id="analyzer-predicted-reach" class="text-2xl font-extrabold text-on-surface">0</span>
+<span class="text-2xl font-extrabold text-on-surface">1.24M</span>
 <span class="text-xs font-bold text-green-600 flex items-center">
 <span class="material-symbols-outlined text-sm">arrow_upward</span> 12%
 </span>
@@ -533,7 +622,7 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 <span class="material-symbols-outlined text-primary text-lg">psychology</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span id="analyzer-confidence" class="text-2xl font-extrabold text-on-surface">0%</span>
+<span class="text-2xl font-extrabold text-on-surface">94.8%</span>
 </div>
 <p class="mt-2 text-[11px] text-on-surface-variant leading-tight">High statistical significance based on recent historical performance metrics.</p>
 </div>
@@ -547,7 +636,7 @@ The analyzer has identified data quality concerns that may impact campaign perfo
 <div class="flex-1">
 <div class="flex justify-between mb-1">
 <span class="text-[10px] text-on-surface-variant">Validation</span>
-<span id="analyzer-data-integrity" class="text-[10px] font-bold text-on-surface">0%</span>
+<span class="text-[10px] font-bold text-on-surface">99.2%</span>
 </div>
 <div class="h-1 w-full bg-surface-container rounded-full">
 <div class="h-full bg-green-500 rounded-full w-[99%]"></div>
@@ -630,7 +719,54 @@ Based on your campaign objectives, our engine has identified three high-probabil
 </p>
 </div>
 <!-- Audience Segments -->
-<div id="bucketing-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+<!-- Segment Card 1 -->
+<div class="relative group p-6 rounded-lg bg-surface-container-lowest border-2 border-primary shadow-sm flex flex-col justify-between h-48 cursor-pointer transition-all">
+<div class="absolute top-4 right-4">
+<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[14px]" data-weight="fill">check</span>
+</div>
+</div>
+<div>
+<div class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">High Propensity</div>
+<h4 class="text-lg font-bold text-on-surface leading-tight">High-Value Churn Risk</h4>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Users with &gt;$500 LTV showing decreased login frequency.</p>
+</div>
+<div class="flex items-center gap-4 mt-4">
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
+<span class="text-sm font-bold">12,402</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-medium">Est. ROI</span>
+<span class="text-sm font-bold text-primary">+24%</span>
+</div>
+</div>
+</div>
+<!-- Segment Card 2 -->
+<div class="relative group p-6 rounded-lg bg-surface-container-low border border-transparent hover:border-outline-variant/40 shadow-none flex flex-col justify-between h-48 cursor-pointer transition-all">
+<div class="absolute top-4 right-4">
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant flex items-center justify-center"></div>
+</div>
+<div>
+<div class="text-[10px] font-bold text-on-surface-variant opacity-60 uppercase tracking-widest mb-1">Emerging Trend</div>
+<h4 class="text-lg font-bold text-on-surface leading-tight">Early Adopter Pulse</h4>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Beta feature testers who haven't upgraded yet.</p>
+</div>
+<div class="flex items-center gap-4 mt-4">
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
+<span class="text-sm font-bold">4,891</span>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant uppercase font-medium">Est. ROI</span>
+<span class="text-sm font-bold text-on-surface-variant">+12%</span>
+</div>
+</div>
+</div>
+</div>
 <!-- Navigation -->
 <div class="flex justify-between items-center pt-6 border-t border-outline-variant/10">
 <a href="#" onclick="openModal('smart-analyzer-modal'); closeModal('bucketing-modal')" class="flex items-center gap-2 px-6 py-2.5 text-on-surface-variant font-bold text-sm hover:bg-surface-container-high transition-colors rounded">
@@ -706,15 +842,25 @@ Continue to Creative
 <div class="space-y-6">
 <div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Subject Line</label>
-<input id="creative-subject-input" type="text" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm" placeholder="Enter compelling subject line..." value="">
+<input type="text" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm" placeholder="Enter compelling subject line..." value="Unlock Enterprise Growth: Your Q4 Strategy Awaits">
 </div>
 <div>
 <label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Email Body</label>
-<textarea id="creative-body-input" class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[200px]" placeholder="Write your email content..."></textarea>
-</div>
-<div>
-<label class="block text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">Bucket</label>
-<select id="creative-bucket-select" class="w-full bg-surface-container-low border-0 rounded-lg p-3 text-sm"></select>
+<textarea class="w-full bg-surface-container-low border-0 border-b-2 border-transparent focus:border-primary focus:ring-0 rounded-lg p-3 text-sm min-h-[200px]" placeholder="Write your email content...">Dear [First Name],
+
+As we approach Q4, we're excited to share breakthrough insights that have helped enterprise teams like yours accelerate growth by 40%.
+
+Our latest platform updates include:
+ΓÇó Advanced analytics dashboard
+ΓÇó Automated workflow optimization
+ΓÇó Enhanced security protocols
+
+Ready to transform your operations?
+
+[CTA Button: Schedule Demo]
+
+Best regards,
+The Campaign Architect Team</textarea>
 </div>
 </div>
 </div>
@@ -723,8 +869,14 @@ Continue to Creative
 <div class="bg-surface-container-low p-6 rounded-lg">
 <h3 class="font-bold text-on-surface mb-4">Email Preview</h3>
 <div class="bg-white p-4 rounded border text-xs">
-<div id="creative-preview-subject" class="font-bold mb-2">Subject:</div>
-<div id="creative-preview-body" class="text-gray-600 leading-relaxed"></div>
+<div class="font-bold mb-2">Subject: Unlock Enterprise Growth: Your Q4 Strategy Awaits</div>
+<div class="text-gray-600 leading-relaxed">
+Dear [First Name],<br><br>
+As we approach Q4, we're excited to share breakthrough insights...<br><br>
+[CTA Button: Schedule Demo]<br><br>
+Best regards,<br>
+The Campaign Architect Team
+</div>
 </div>
 </div>
 <div class="bg-surface-container-low p-6 rounded-lg">
@@ -810,15 +962,28 @@ Back to Bucketing
 <div class="bg-surface-container-low p-6 rounded-lg">
 <h3 class="font-bold text-on-surface mb-4">Campaign Details</h3>
 <div class="grid grid-cols-2 gap-4 text-sm">
-<div><span class="text-on-surface-variant">Name:</span> <span id="launch-campaign-name">-</span></div>
-<div><span class="text-on-surface-variant">Segments:</span> <span id="launch-selected-segments">0 Selected</span></div>
-<div><span class="text-on-surface-variant">Total Reach:</span> <span id="launch-total-reach">0 Leads</span></div>
+<div><span class="text-on-surface-variant">Name:</span> Q4 Enterprise Outreach_v2</div>
+<div><span class="text-on-surface-variant">Segments:</span> 2 Selected</div>
+<div><span class="text-on-surface-variant">Total Reach:</span> 17,293 Leads</div>
 <div><span class="text-on-surface-variant">Est. Send Time:</span> Immediate</div>
 </div>
 </div>
 <div class="bg-surface-container-low p-6 rounded-lg">
 <h3 class="font-bold text-on-surface mb-4">Quality Checks</h3>
-<div id="launch-quality-checks" class="space-y-3"></div>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-600">check_circle</span>
+<span class="text-sm">Content reviewed and approved</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-600">check_circle</span>
+<span class="text-sm">Audience segments validated</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-600">check_circle</span>
+<span class="text-sm">Compliance requirements met</span>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -828,7 +993,7 @@ Back to Bucketing
 <h3 class="font-bold text-on-surface mb-4">Launch Campaign</h3>
 <p class="text-sm text-on-surface-variant mb-6">Your campaign is ready to launch. This action cannot be undone.</p>
 <div class="space-y-3">
-<button onclick="launchCampaign()" class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors font-semibold">
+<button onclick="launchCampaign(); closeModal('launch-modal')" class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors font-semibold">
 <span class="material-symbols-outlined">rocket_launch</span>
 Launch Campaign Now
 </button>
@@ -911,28 +1076,27 @@ Back to Creative
 
 <!-- JavaScript for Modal Functionality -->
 <script>
-const campaignState = {
-    result: null,
-    selectedBucketIds: [],
-    creativeByBucket: {},
-};
-
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     const mainContent = document.getElementById('main-content');
-
+    
     if (modal && mainContent) {
         modal.classList.remove('hidden');
         mainContent.style.filter = 'blur(4px)';
         mainContent.style.pointerEvents = 'none';
         document.body.style.overflow = 'hidden';
+        
+        // Animate in
+        setTimeout(() => {
+            modal.querySelector('.modal-enter')?.classList.add('modal-enter-active');
+        }, 10);
     }
 }
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     const mainContent = document.getElementById('main-content');
-
+    
     if (modal && mainContent) {
         modal.classList.add('hidden');
         mainContent.style.filter = 'none';
@@ -941,385 +1105,21 @@ function closeModal(modalId) {
     }
 }
 
-function formatInt(value) {
-    return Number(value || 0).toLocaleString();
+function launchCampaign() {
+    alert('Campaign launched successfully!');
+    // Here you could add actual launch logic
 }
 
-async function runCampaignPipeline() {
-    const about = (document.getElementById('campaign-about-input')?.value || '').trim();
-    const campaignFor = (document.getElementById('campaign-for-input')?.value || '').trim();
-    const success = (document.getElementById('campaign-success-input')?.value || '').trim();
-
-    if (!about || !campaignFor || !success) {
-        alert('Please fill About, For, and Success Conditions before starting the wizard.');
-        return false;
-    }
-
-    const response = await fetch('/api/internal/campaign/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            about: about,
-            campaign_for: campaignFor,
-            success_conditions: success,
-        }),
-    });
-
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || 'Campaign run failed.');
-    }
-
-    campaignState.result = await response.json();
-    campaignState.selectedBucketIds = [];
-    campaignState.creativeByBucket = {};
-    hydrateWizard();
-    return true;
-}
-
-function hydrateWizard() {
-    const result = campaignState.result;
-    if (!result) {
-        return;
-    }
-
-    const dr = result.data_review || {};
-    const analyzer = result.analyzer || {};
-    const buckets = result.buckets || [];
-
-    document.getElementById('dr-campaign-name').textContent = dr.campaign_name || '-';
-    document.getElementById('dr-source-db').textContent = dr.source_database || '-';
-    document.getElementById('dr-estimated-reach').textContent = formatInt(dr.estimated_reach) + ' Leads';
-    document.getElementById('dr-target-summary').textContent = dr.target_summary || '-';
-
-    document.getElementById('analyzer-message').textContent = analyzer.message || 'Analyzer results unavailable.';
-    document.getElementById('analyzer-primary-insight').textContent = analyzer.possible ? 'Audience rows found for campaign inputs.' : 'No rows returned for current campaign inputs.';
-    document.getElementById('analyzer-predicted-reach').textContent = formatInt(analyzer.predicted_reach || 0);
-    document.getElementById('analyzer-confidence').textContent = (analyzer.confidence_score || 0) + '%';
-    document.getElementById('analyzer-data-integrity').textContent = (analyzer.data_integrity || 0) + '%';
-    document.getElementById('analyzer-status-title').textContent = analyzer.possible ? 'Analysis Complete' : 'No Reachable Audience';
-
-    const statusBox = document.getElementById('analyzer-status-box');
-    const failBox = document.getElementById('analyzer-fail-box');
-    if (analyzer.possible) {
-        statusBox.classList.remove('hidden');
-        failBox.classList.add('hidden');
-    } else {
-        statusBox.classList.add('hidden');
-        failBox.classList.remove('hidden');
-    }
-
-    renderBucketCards(buckets);
-    renderCreativeBucketSelect();
-    renderLaunchSummary();
-}
-
-function renderBucketCards(buckets) {
-    const container = document.getElementById('bucketing-cards');
-    container.innerHTML = '';
-
-    if (!buckets.length) {
-        container.innerHTML = '<div class="p-6 rounded-lg bg-surface-container-low text-sm text-on-surface-variant">No buckets were generated for these campaign inputs.</div>';
-        return;
-    }
-
-    buckets.forEach((bucket) => {
-        const selected = campaignState.selectedBucketIds.includes(bucket.id);
-        const card = document.createElement('div');
-        card.className = 'relative group p-6 rounded-lg border cursor-pointer transition-all ' + (selected ? 'bg-surface-container-lowest border-primary shadow-sm' : 'bg-surface-container-low border-outline-variant/20');
-        card.innerHTML = `
-            <div class="absolute top-4 right-4">
-                <div class="w-5 h-5 rounded-full ${selected ? 'bg-primary' : 'border-2 border-outline-variant'} flex items-center justify-center">
-                    <span class="material-symbols-outlined text-${selected ? 'on-primary' : 'outline-variant'} text-[14px]">${selected ? 'check' : ''}</span>
-                </div>
-            </div>
-            <div>
-                <div class="text-[10px] font-bold uppercase tracking-widest mb-1 ${selected ? 'text-primary' : 'text-on-surface-variant'}">Bucket ${bucket.rank}</div>
-                <h4 class="text-lg font-bold text-on-surface leading-tight">${bucket.name}</h4>
-                <p class="text-xs text-on-surface-variant mt-2 leading-relaxed">${bucket.rationale || 'No rationale provided.'}</p>
-            </div>
-            <div class="flex items-center gap-4 mt-4">
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-on-surface-variant uppercase font-medium">Reach</span>
-                    <span class="text-sm font-bold">${formatInt(bucket.row_count)}</span>
-                </div>
-                <div class="h-6 w-[1px] bg-outline-variant/30"></div>
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-on-surface-variant uppercase font-medium">Treatment</span>
-                    <span class="text-sm font-bold text-primary">${bucket.suggested_treatment || 'N/A'}</span>
-                </div>
-            </div>
-        `;
-        card.addEventListener('click', function () {
-            toggleBucketSelection(bucket.id);
-        });
-        container.appendChild(card);
-    });
-}
-
-function toggleBucketSelection(bucketId) {
-    const idx = campaignState.selectedBucketIds.indexOf(bucketId);
-    if (idx >= 0) {
-        campaignState.selectedBucketIds.splice(idx, 1);
-    } else {
-        campaignState.selectedBucketIds.push(bucketId);
-    }
-
-    renderBucketCards(campaignState.result?.buckets || []);
-    renderCreativeBucketSelect();
-    renderLaunchSummary();
-}
-
-function getSelectedBuckets() {
-    const allBuckets = campaignState.result?.buckets || [];
-    return allBuckets.filter((bucket) => campaignState.selectedBucketIds.includes(bucket.id));
-}
-
-function renderCreativeBucketSelect() {
-    const select = document.getElementById('creative-bucket-select');
-    const selectedBuckets = getSelectedBuckets();
-    select.innerHTML = '';
-
-    if (!selectedBuckets.length) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Select at least one bucket in Bucketing step';
-        select.appendChild(opt);
-        document.getElementById('creative-subject-input').value = '';
-        document.getElementById('creative-body-input').value = '';
-        updateCreativePreview();
-        return;
-    }
-
-    selectedBuckets.forEach((bucket) => {
-        const opt = document.createElement('option');
-        opt.value = String(bucket.id);
-        opt.textContent = `${bucket.name} (${formatInt(bucket.row_count)} rows)`;
-        select.appendChild(opt);
-    });
-
-    const firstId = Number(select.value || selectedBuckets[0].id);
-    loadCreativeForBucket(firstId);
-}
-
-function loadCreativeForBucket(bucketId) {
-    const bucket = (campaignState.result?.buckets || []).find((item) => item.id === bucketId);
-    if (!bucket) {
-        return;
-    }
-
-    const draft = campaignState.creativeByBucket[bucketId] || {
-        subject: bucket.email_subject || `Campaign for ${bucket.name}`,
-        body: bucket.email_body || '',
-    };
-
-    campaignState.creativeByBucket[bucketId] = draft;
-    document.getElementById('creative-subject-input').value = draft.subject;
-    document.getElementById('creative-body-input').value = draft.body;
-    updateCreativePreview();
-}
-
-function updateCreativePreview() {
-    const subjectInput = document.getElementById('creative-subject-input');
-    const bodyInput = document.getElementById('creative-body-input');
-    document.getElementById('creative-preview-subject').textContent = 'Subject: ' + (subjectInput.value || '');
-    document.getElementById('creative-preview-body').innerHTML = (bodyInput.value || '').replace(/\n/g, '<br>');
-
-    const bucketId = Number(document.getElementById('creative-bucket-select').value || 0);
-    if (bucketId) {
-        campaignState.creativeByBucket[bucketId] = {
-            subject: subjectInput.value,
-            body: bodyInput.value,
-        };
-    }
-}
-
-function renderLaunchSummary() {
-    const selectedBuckets = getSelectedBuckets();
-    const totalReach = selectedBuckets.reduce((sum, bucket) => sum + Number(bucket.row_count || 0), 0);
-    const campaignName = campaignState.result?.data_review?.campaign_name || '-';
-    const qualityChecks = campaignState.result?.launch?.quality_checks || [];
-
-    document.getElementById('launch-campaign-name').textContent = campaignName;
-    document.getElementById('launch-selected-segments').textContent = `${selectedBuckets.length} Selected`;
-    document.getElementById('launch-total-reach').textContent = `${formatInt(totalReach)} Leads`;
-
-    const checksContainer = document.getElementById('launch-quality-checks');
-    checksContainer.innerHTML = '';
-    qualityChecks.forEach((check) => {
-        const row = document.createElement('div');
-        row.className = 'flex items-center gap-3';
-        row.innerHTML = `<span class="material-symbols-outlined ${check.passed ? 'text-green-600' : 'text-red-600'}">${check.passed ? 'check_circle' : 'cancel'}</span><span class="text-sm">${check.label}</span>`;
-        checksContainer.appendChild(row);
-    });
-}
-
-function getLaunchDateLabel() {
-    return new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-    });
-}
-
-function renderPreviousCampaigns(campaignRows) {
-    const tbody = document.getElementById('previous-campaigns-body');
-    if (!tbody) {
-        return;
-    }
-
-    tbody.innerHTML = '';
-
-    campaignRows.forEach((item) => {
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-surface-container-low/50 transition-colors';
-        row.innerHTML = `
-            <td class="px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-primary-fixed flex items-center justify-center text-primary">
-                        <span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
-                    </div>
-                    <span class="font-semibold text-on-surface">${item.campaign_name || 'Campaign'}</span>
-                </div>
-            </td>
-            <td class="px-6 py-5">
-                <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-tight">${item.status || 'Launched'}</span>
-            </td>
-            <td class="px-6 py-5 text-sm text-on-surface-variant">${item.launch_date || getLaunchDateLabel()}</td>
-            <td class="px-6 py-5">
-                <p class="text-[10px] text-on-surface-variant uppercase font-bold">Reach</p>
-                <p class="text-sm font-bold text-primary">${formatInt(item.total_reach || 0)}</p>
-            </td>
-            <td class="px-6 py-5 text-right">
-                <button class="text-on-surface-variant hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    const summary = document.getElementById('previous-campaigns-summary');
-    if (summary) {
-        const count = campaignRows.length;
-        summary.textContent = `Showing ${count} campaigns`;
-    }
-}
-
-async function loadPreviousCampaigns() {
-    try {
-        const response = await fetch('/api/internal/campaign/history');
-        if (!response.ok) {
-            throw new Error('Unable to load campaign history');
-        }
-        const rows = await response.json();
-        renderPreviousCampaigns(Array.isArray(rows) ? rows : []);
-    } catch (_err) {
-        renderPreviousCampaigns([]);
-    }
-}
-
-function resetCampaignFormAndWorkflow() {
-    const aboutInput = document.getElementById('campaign-about-input');
-    const forInput = document.getElementById('campaign-for-input');
-    const successInput = document.getElementById('campaign-success-input');
-
-    if (aboutInput) {
-        aboutInput.value = '';
-    }
-    if (forInput) {
-        forInput.value = '';
-    }
-    if (successInput) {
-        successInput.value = '';
-    }
-
-    campaignState.result = null;
-    campaignState.selectedBucketIds = [];
-    campaignState.creativeByBucket = {};
-
-    document.getElementById('dr-campaign-name').textContent = '-';
-    document.getElementById('dr-source-db').textContent = '-';
-    document.getElementById('dr-estimated-reach').textContent = '-';
-    document.getElementById('dr-target-summary').textContent = '-';
-
-    document.getElementById('bucketing-cards').innerHTML = '';
-    document.getElementById('creative-bucket-select').innerHTML = '';
-    document.getElementById('creative-subject-input').value = '';
-    document.getElementById('creative-body-input').value = '';
-    updateCreativePreview();
-
-    document.getElementById('launch-campaign-name').textContent = '-';
-    document.getElementById('launch-selected-segments').textContent = '0 Selected';
-    document.getElementById('launch-total-reach').textContent = '0 Leads';
-    document.getElementById('launch-quality-checks').innerHTML = '';
-}
-
-async function launchCampaign() {
-    if (!campaignState.result) {
-        alert('Run the campaign pipeline first.');
-        return;
-    }
-
-    const selectedBuckets = getSelectedBuckets();
-    const totalReach = selectedBuckets.reduce((sum, bucket) => sum + Number(bucket.row_count || 0), 0);
-
-    if (!selectedBuckets.length || totalReach === 0) {
-        alert('Cannot launch: no reachable rows from selected buckets.');
-        return;
-    }
-
-    const response = await fetch('/api/internal/campaign/launch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            campaign_name: campaignState.result.data_review?.campaign_name,
-            selected_buckets: selectedBuckets,
-            creative: campaignState.creativeByBucket,
-            total_reach: totalReach,
-        }),
-    });
-
-    const payload = await response.json();
-    if (!response.ok) {
-        alert(payload.error || 'Launch failed.');
-        return;
-    }
-
-    await loadPreviousCampaigns();
-    resetCampaignFormAndWorkflow();
-    closeModal('launch-modal');
-    alert(`Campaign launched: ${payload.campaign_name} (${payload.total_reach} rows)`);
-}
-
-document.getElementById('start-campaign-wizard-btn').addEventListener('click', async function (event) {
-    event.preventDefault();
-    openModal('data-review-modal');
-    document.getElementById('dr-campaign-name').textContent = 'Loading...';
-    document.getElementById('dr-source-db').textContent = 'Loading...';
-    document.getElementById('dr-estimated-reach').textContent = 'Loading...';
-    document.getElementById('dr-target-summary').textContent = 'Loading...';
-    try {
-        await runCampaignPipeline();
-    } catch (err) {
-        closeModal('data-review-modal');
-        alert(err.message || 'Unable to run campaign pipeline.');
-    }
-});
-
-document.getElementById('creative-bucket-select').addEventListener('change', function (event) {
-    loadCreativeForBucket(Number(event.target.value));
-});
-
-document.getElementById('creative-subject-input').addEventListener('input', updateCreativePreview);
-document.getElementById('creative-body-input').addEventListener('input', updateCreativePreview);
-
+// Close modal when clicking backdrop
 document.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal-backdrop')) {
-        closeModal(event.target.id);
+        const modal = event.target;
+        const modalId = modal.id;
+        closeModal(modalId);
     }
 });
 
+// Close modal on Escape key
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         const openModals = document.querySelectorAll('.modal-backdrop:not(.hidden)');
@@ -1328,8 +1128,6 @@ document.addEventListener('keydown', function(event) {
         });
     }
 });
-
-loadPreviousCampaigns();
 </script>
 
 </body></html>
