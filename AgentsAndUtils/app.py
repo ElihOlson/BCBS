@@ -8,7 +8,7 @@ from flask import Flask, send_file, jsonify, request
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-# Add this directory to path so we can import sibling modules
+# Let Python find the other files in this folder
 basedir = Path(__file__).resolve().parent
 if str(basedir) not in sys.path:
     sys.path.insert(0, str(basedir))
@@ -34,7 +34,7 @@ email_agent = emailAgent()
 
 campaign_history_path = basedir / "launched_campaigns.json"
 
-# Startup check
+# Quick startup check
 def startup_checks():
     print("\n" + "="*40)
     print("STARTING BCBS BACKEND")
@@ -52,12 +52,16 @@ def startup_checks():
 
 startup_checks()
 
-# 3. FLASK APP & ROUTES
+# This is the flask and routes section
 app = Flask(__name__)
 
 
 def build_campaign_bucket_prefix(about, campaign_for, success_conditions):
-    """Build a short deterministic label from user inputs for bucket names."""
+    """
+    Input: about, campaign_for, and success_conditions from the campaign form.
+    Purpose: turn those inputs into a short label for the bucket names.
+    Returns: a short cleaned-up prefix, or "Campaign" if nothing useful is there.
+    """
     raw = f"{about} {campaign_for} {success_conditions}".strip().lower()
     tokens = re.findall(r"[a-z0-9]+", raw)
     if not tokens:
@@ -105,7 +109,7 @@ def api_campaign_run():
         total_reach = 0
         campaign_prefix = build_campaign_bucket_prefix(about, campaign_for, success_conditions)
 
-        # Override bucket names with user-input-based names BEFORE writing CSVs
+        # Rename the buckets before the CSVs get written out
         for idx, bucket in enumerate(bucket_payload.get("buckets", []), start=1):
             bucket["name"] = f"{campaign_prefix} - Segment {idx}"
 
@@ -134,7 +138,7 @@ def api_campaign_run():
 
         campaign_possible = any(b["row_count"] > 0 for b in buckets)
 
-        # Write CSVs using the updated bucket_payload (with user-input names)
+        # Save the CSVs with the updated bucket names
         try:
             bucket_output_path = basedir / "bucket_output.csv"
             bucket_output_path.write_text(json_to_csv(json.dumps(bucket_payload)), encoding="utf-8")

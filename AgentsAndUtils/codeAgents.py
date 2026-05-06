@@ -18,7 +18,7 @@ class emailAgent:
     def __init__(self):
         
         #self.client = Groq(api_key=grokKey)
-        self.client = OpenAI(api_key=grokKey,base_url= grokURL) # <-- swap this per provider )
+        self.client = OpenAI(api_key=grokKey,base_url= grokURL) # Swap this if the provider changes.
 
     def sendMessage(self, prompt='none', systemPrompt='none'):
         chat_completion = self.client.chat.completions.create(
@@ -71,9 +71,9 @@ class bucketingAgent:
             section_name (str): Label for the terminal prompt section.
             guidance_text (str): Example/instructions shown to the user for that section.
         Purpose:
-            Collects one non-empty plain-text input from the terminal for a campaign section.
+            Ask for one plain-text campaign section and keep asking until something gets entered.
         Returns:
-            str: User-entered plain-text value for the requested section.
+            str: The text the user entered for that section.
         """
         prompt_text = (
             f"\nEnter the {section_name} details in plain text.\n"
@@ -94,9 +94,9 @@ class bucketingAgent:
             campaign_for_text (str): Plain-text description of the target audience.
             success_conditions_text (str): Plain-text description of metrics and weights.
         Purpose:
-            Converts the three plain-text campaign sections into the required structured JSON brief.
+            Turn the three plain-text campaign sections into the structured JSON brief we need.
         Returns:
-            dict: Campaign request object with keys `about`, `for`, and `success_conditions`.
+            dict: A campaign request with `about`, `for`, and `success_conditions`.
         """
         system_prompt = """You convert campaign planning notes into a JSON object.
 
@@ -148,10 +148,10 @@ Normalization rules:
         Inputs:
             None
         Purpose:
-            Prompts the user for About, For, and Success Conditions in plain text,
-            then builds the normalized campaign request JSON object.
+            Ask for About, For, and Success Conditions in plain text,
+            then build the normalized campaign request JSON.
         Returns:
-            dict: Structured campaign request ready to be embedded in the bucketing prompt.
+            dict: Structured campaign request ready for the bucketing prompt.
         """
         about_text = self.prompt_for_text_section(
             "About",

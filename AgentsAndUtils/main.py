@@ -11,19 +11,19 @@ from io import StringIO
 def json_to_csv(json_string):
     """
     Inputs:
-        json_string (str): JSON text containing universe metadata and bucket rows.
+        json_string (str): Raw JSON text with the universe info and bucket rows.
     Purpose:
-        Converts the generated bucket JSON payload into CSV text for bucket_output.csv.
+        Turn the generated bucket payload into the CSV text for bucket_output.csv.
     Returns:
-        str: CSV-formatted string with one row per bucket.
+        str: CSV text with one row per bucket.
     """
     json_string = json_string.strip().replace("```json", "").replace("```", "").strip()
     data = json.loads(json_string)
     
     output = StringIO()
-    writer = csv.writer(output)
+    writer = csv.writer(output, lineterminator="\n") #Lineterminator fixes whitespace issue in bucket_output
     
-    # Define CSV headers
+    # Set up the CSV columns
     headers = [
         "universe_definition",
         "primary_slicing_axis",
@@ -38,12 +38,12 @@ def json_to_csv(json_string):
     
     writer.writerow(headers)
     
-    # Extract top-level fields
+    # Pull the shared top-level fields once
     universe_definition = data.get("universe_definition")
     primary_slicing_axis = data.get("primary_slicing_axis")
     coverage_note = data.get("coverage_note")
     
-    # Iterate through buckets
+    # Write one row for each bucket
     for bucket in data.get("buckets", []):
         writer.writerow([
             universe_definition,
@@ -65,9 +65,9 @@ def sanitize_generated_sql(sql_query):
     Inputs:
         sql_query (str): A generated SQL statement.
     Purpose:
-        Auto-corrects known invalid SQL patterns produced by the model.
+        Clean up the SQL when the model gives us patterns we already know are wrong.
     Returns:
-        str: Sanitized SQL statement.
+        str: The cleaned-up SQL statement.
     """
     if not sql_query:
         return sql_query
@@ -103,10 +103,9 @@ def ensure_unique_bucket_names(payload):
     Inputs:
         payload (dict): Parsed bucket payload containing a `buckets` list.
     Purpose:
-        Enforces unique bucket names for each generation run while preserving
-        the model-provided naming intent.
+        Make sure each bucket name is unique without throwing away the original name.
     Returns:
-        dict: Updated payload with unique `name` values.
+        dict: The payload with unique `name` values.
     """
     seen = {}
 
@@ -132,9 +131,9 @@ def normalize_generated_bucket_sqls(raw_bucket_json):
     Inputs:
         raw_bucket_json (str): Raw JSON text from the bucketing agent.
     Purpose:
-        Parses generated bucket JSON and sanitizes each bucket SQL before downstream use.
+        Parse the generated bucket JSON and clean up each SQL string before anything else uses it.
     Returns:
-        str: Normalized JSON string with corrected SQL statements.
+        str: Normalized JSON with corrected SQL statements.
     """
     cleaned = raw_bucket_json.strip().replace("```json", "").replace("```", "").strip()
     payload = json.loads(cleaned)
@@ -154,9 +153,9 @@ def read_bucket_rows(bucket_csv_path):
     Inputs:
         bucket_csv_path (Path): File path to bucket_output.csv.
     Purpose:
-        Reads bucket rows from CSV and normalizes the fields needed by downstream steps.
+        Read the bucket rows from CSV and keep the fields the next steps actually need.
     Returns:
-        list[dict]: List of bucket dictionaries containing rank, name, sql, and rationale.
+        list[dict]: Bucket rows with rank, name, sql, and rationale.
     """
     bucket_rows = []
 
@@ -180,9 +179,9 @@ def export_sql_results(bucket_rows, output_csv_path, supabase_client):
         output_csv_path (Path): Destination path for SQL_results.csv.
         supabase_client (supabaseInteractions): Supabase helper used to run SQL queries.
     Purpose:
-        Executes each bucket SQL query and writes query outcomes/results into SQL_results.csv.
+        Run each bucket SQL query and write the results into SQL_results.csv.
     Returns:
-        None: Writes output to disk and prints the destination path.
+        None: Writes the file and prints where it went.
     """
     results_to_write = []
 
@@ -277,7 +276,7 @@ if __name__ == "__main__":
 
     print("OUTPUT: \n\n", myBuckets)
 
-    #write content to csv
+    # Write the bucket output to CSV
     try:
         sqlList = []
         output_file = Path(__file__).resolve().parent / "bucket_output.csv"
@@ -287,7 +286,7 @@ if __name__ == "__main__":
         print("\n\n\n"+response)
         output_file.write_text(response, encoding="utf-8", newline="")
 
-        # Reuse original flow: pull SQL + rationale pairs into sqlList.
+        # Keep the old flow and build sqlList from the SQL and rationale pairs.
         bucket_rows = read_bucket_rows(output_file)
         for bucket in bucket_rows:
             sqlList.append([bucket["sql"], bucket["rationale"]])
